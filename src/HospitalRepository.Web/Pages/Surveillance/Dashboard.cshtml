@@ -1,0 +1,2538 @@
+﻿
+@page
+@{
+    ViewData["Title"] = "National Surveillance Dashboard";
+}
+
+<link rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    .surveillance-dashboard { color: var(--bs-body-color); }
+
+    .surveillance-card {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 12px;
+        padding: 20px;
+        height: 100%;
+    }
+
+    .surveillance-label {
+        color: var(--bs-secondary-color);
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .surveillance-number {
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .surveillance-section {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 22px;
+    }
+
+    .surveillance-section h5 {
+        font-weight: 650;
+        margin-bottom: 18px;
+    }
+
+    .surveillance-bar {
+        height: 12px;
+        background: #e9ecef;
+        border-radius: 8px;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .surveillance-bar-fill,
+    .surveillance-burden-fill {
+        height: 100%;
+        background: #2878c8;
+        border-radius: 8px;
+    }
+
+    .surveillance-burden-bar {
+        height: 10px;
+        background: #e9ecef;
+        border-radius: 8px;
+        overflow: hidden;
+        min-width: 100px;
+    }
+
+    .surveillance-status {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+        background: var(--bs-tertiary-bg);
+    }
+
+    .surveillance-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .surveillance-table th,
+    .surveillance-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--bs-border-color);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .surveillance-table th {
+        color: var(--bs-secondary-color);
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .surveillance-empty {
+        color: var(--bs-secondary-color);
+        padding: 15px 0;
+    }
+
+    .surveillance-alert {
+        border-left: 5px solid #dc3545;
+        background: rgba(220, 53, 69, 0.08);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
+
+    .surveillance-alert-title {
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .surveillance-increase {
+        color: #dc3545;
+        font-weight: 700;
+    }
+
+    .surveillance-decrease {
+        color: #198754;
+        font-weight: 700;
+    }
+
+    .surveillance-no-change {
+        color: var(--bs-secondary-color);
+    }
+
+    .surveillance-comparison-table th,
+    .surveillance-comparison-table td {
+        text-align: center;
+    }
+
+    .surveillance-comparison-table th:first-child,
+    .surveillance-comparison-table td:first-child {
+        text-align: left;
+        min-width: 180px;
+    }
+
+    .surveillance-count,
+    .surveillance-rank,
+    .surveillance-percentage {
+        font-weight: 700;
+    }
+
+    .surveillance-percentage {
+        white-space: nowrap;
+    }
+
+    .disease-trend-card {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 18px;
+    }
+
+    .disease-trend-heading {
+        font-weight: 700;
+        font-size: 17px;
+        margin-bottom: 12px;
+    }
+
+    .disease-month-alert {
+        background: rgba(220, 53, 69, 0.08);
+    }
+
+    .hospital-contribution {
+        font-size: 12px;
+        color: var(--bs-secondary-color);
+        margin-top: 4px;
+    }
+
+    .trend-direction {
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+    #kenyaHospitalMap {
+        height: 520px;
+        width: 100%;
+        border-radius: 10px;
+        z-index: 1;
+    }
+
+    .hospital-map-popup {
+        min-width: 220px;
+        line-height: 1.6;
+    }
+
+    .county-chart-container {
+        position: relative;
+        height: 420px;
+        width: 100%;
+    }
+
+    .county-disease-card {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 14px;
+    }
+
+    .county-disease-heading {
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    /* Compact chart layout */
+    .surveillance-chart-card {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 10px;
+        padding: 16px;
+        height: 100%;
+        min-width: 0;
+    }
+
+    .surveillance-chart-container {
+        position: relative;
+        height: 310px;
+        width: 100%;
+    }
+
+    .diagnosis-chart-status {
+        color: var(--bs-secondary-color);
+        font-size: 13px;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .hospital-comparison-chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
+    }
+
+    .monthly-trend-detail {
+        border-top: 1px solid var(--bs-border-color);
+        padding-top: 16px;
+        margin-top: 18px;
+    }
+
+    .analysis-chart-wrap {
+        position: relative;
+        width: 100%;
+        height: 300px;
+        min-width: 0;
+    }
+
+    .analysis-chart-wrap.tall {
+        height: 360px;
+    }
+
+    .analysis-chart-wrap.compact {
+        height: 240px;
+    }
+
+    .analysis-kpi {
+        border: 1px solid var(--bs-border-color);
+        border-radius: 10px;
+        padding: 12px 14px;
+        height: 100%;
+        background: var(--bs-tertiary-bg);
+    }
+
+    .analysis-kpi .value {
+        font-size: 1.35rem;
+        font-weight: 750;
+        line-height: 1.25;
+    }
+
+    .analysis-kpi .caption {
+        color: var(--bs-secondary-color);
+        font-size: .78rem;
+    }
+
+    .disease-trend-chart {
+        position: relative;
+        height: 230px;
+        margin: 10px 0 18px;
+    }
+
+    .analysis-legend-note {
+        color: var(--bs-secondary-color);
+        font-size: .78rem;
+    }
+
+    .surveillance-alert-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+        gap: 12px;
+    }
+
+    .surveillance-alert {
+        margin-bottom: 0;
+        min-width: 0;
+    }
+
+    .surveillance-table th,
+    .surveillance-table td {
+        overflow-wrap: anywhere;
+    }
+
+    @@media (max-width: 767px) {
+        .surveillance-section {
+            padding: 14px;
+        }
+
+        #kenyaHospitalMap {
+            height: 380px;
+        }
+
+        .surveillance-chart-container {
+            height: 280px;
+        }
+
+        .hospital-comparison-chart-container {
+            height: 350px;
+        }
+    }
+</style>
+
+<div class="container-fluid surveillance-dashboard py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <p class="text-secondary mb-1">National Hospital Repository</p>
+            <h1 class="h3 fw-bold mb-1">National Disease Surveillance</h1>
+            <p class="text-secondary mb-0">
+                Aggregated clinical encounter analysis across participating hospitals.
+            </p>
+        </div>
+
+        <button id="refreshSurveillance" class="btn btn-primary" type="button">
+            Refresh Analysis
+        </button>
+    </div>
+
+    <!-- Interactive surveillance filters -->
+    <div class="surveillance-section mt-0 mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h5 class="mb-1">Filter Surveillance Analysis</h5>
+                <p class="text-secondary small mb-0">Apply a reporting period, disease, county or hospital filter to the dashboard.</p>
+            </div>
+            <button id="resetSurveillanceFilters" class="btn btn-outline-secondary btn-sm" type="button">Reset filters</button>
+        </div>
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-sm-6 col-xl-2">
+                <label class="form-label" for="filterFromUtc">From date</label>
+                <input id="filterFromUtc" class="form-control" type="date" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-2">
+                <label class="form-label" for="filterToUtc">To date</label>
+                <input id="filterToUtc" class="form-control" type="date" />
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <label class="form-label" for="filterDiagnosis">Disease / diagnosis</label>
+                <select id="filterDiagnosis" class="form-select">
+                    <option value="">All diagnoses</option>
+                </select>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-2">
+                <label class="form-label" for="filterCounty">County</label>
+                <select id="filterCounty" class="form-select">
+                    <option value="">All counties</option>
+                </select>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-2">
+                <label class="form-label" for="filterHospital">Hospital</label>
+                <select id="filterHospital" class="form-select">
+                    <option value="">All hospitals</option>
+                </select>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-1 d-grid">
+                <button id="applySurveillanceFilters" class="btn btn-primary" type="button">Apply</button>
+            </div>
+        </div>
+        <div id="activeSurveillanceFilters" class="small text-secondary mt-3">Showing all available surveillance data.</div>
+    </div>
+
+    <div id="surveillanceStatus" class="surveillance-status">
+        Loading national surveillance data...
+    </div>
+
+    <!-- Summary statistics -->
+    <div class="row g-3">
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="surveillance-card">
+                <div class="surveillance-label">Total Encounters</div>
+                <div id="totalEncounters" class="surveillance-number">--</div>
+                <small class="text-secondary">Recorded clinical encounters</small>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="surveillance-card">
+                <div class="surveillance-label">Diagnosed Encounters</div>
+                <div id="diagnosedEncounters" class="surveillance-number">--</div>
+                <small class="text-secondary">Encounters with a diagnosis</small>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="surveillance-card">
+                <div class="surveillance-label">Reporting Hospitals</div>
+                <div id="reportingHospitals" class="surveillance-number">--</div>
+                <small class="text-secondary">Hospitals contributing encounters</small>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="surveillance-card">
+                <div class="surveillance-label">Recorded Diagnoses</div>
+                <div id="diagnosisCount" class="surveillance-number">--</div>
+                <small class="text-secondary">Distinct diagnosis descriptions</small>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Diagnosis and monthly charts -->
+    <div class="surveillance-section">
+        <div class="row g-4">
+
+            <div class="col-12 col-xl-6">
+                <div class="surveillance-chart-card">
+                    <h5>Diagnosis Distribution</h5>
+
+                    <p class="text-secondary small">
+                        Distribution of recorded diagnoses across participating hospitals.
+                    </p>
+
+                    <div class="surveillance-chart-container">
+                        <canvas id="diagnosisDistributionChart"></canvas>
+                    </div>
+
+                    <div id="diagnosisChartStatus" class="diagnosis-chart-status">
+                        Waiting for diagnosis data...
+                    </div>
+
+                    <p class="text-secondary small mt-3 mb-0">
+                        Percentages represent diagnosed encounters, not the national population.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-12 col-xl-6">
+                <div class="surveillance-chart-card">
+                    <h5>Monthly Encounter Trends</h5>
+
+                    <p class="text-secondary small">
+                        Compare total clinical encounters with diagnosed encounters over time.
+                    </p>
+
+                    <div class="surveillance-chart-container">
+                        <canvas id="monthlyTrendChart"></canvas>
+                    </div>
+
+                    <div id="monthlyChartStatus" class="diagnosis-chart-status">
+                        Waiting for monthly data...
+                    </div>
+
+                    <p class="text-secondary small mt-3 mb-0">
+                        The graph shows recorded encounters per month, not unique patients.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Diagnosis records table -->
+    <div class="surveillance-section">
+        <h5>Diagnosis Records</h5>
+
+        <div class="table-responsive">
+            <table class="surveillance-table">
+                <thead>
+                    <tr>
+                        <th>Diagnosis</th>
+                        <th>Encounters</th>
+                        <th>Reporting Hospitals</th>
+                    </tr>
+                </thead>
+                <tbody id="diagnosisTable">
+                    <tr><td colspan="3">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Kenya hospital geographical map -->
+    <div class="surveillance-section">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h5 class="mb-1">National Hospital Distribution Map</h5>
+                <p class="text-secondary small mb-0">
+                    Geographical distribution of registered hospitals
+                    participating in the National Hospital Repository.
+                </p>
+            </div>
+
+            <div class="text-end">
+                <div class="fw-bold" id="mappedHospitalCount">0</div>
+                <small class="text-secondary">Hospitals mapped</small>
+            </div>
+        </div>
+
+        <div id="kenyaHospitalMap"></div>
+
+        <div class="d-flex flex-wrap gap-3 mt-3 small text-secondary">
+            <span>
+                <strong id="registeredHospitalCount">0</strong>
+                registered hospitals
+            </span>
+
+            <span>
+                <strong id="hospitalsWithoutCoordinates">0</strong>
+                without coordinates
+            </span>
+        </div>
+
+        <p class="text-secondary small mt-3 mb-0">
+            Select a hospital marker to view its location and recorded
+            encounter statistics. Hospitals without coordinates are not
+            displayed on the map. Encounter counts are not population-adjusted
+            disease rates.
+        </p>
+
+        <div id="hospitalMapStatus" class="small text-secondary mt-2">
+            Waiting for hospital location data...
+        </div>
+    </div>
+
+    <!-- County-level disease surveillance -->
+    <div class="surveillance-section">
+        <h5>County-Level Disease Surveillance</h5>
+
+        <p class="text-secondary small">
+            Compare recorded diagnosed encounters across counties
+            using the registered locations of participating hospitals.
+        </p>
+
+        <div class="county-chart-container">
+            <canvas id="countyComparisonChart"></canvas>
+        </div>
+
+        <h6 class="fw-bold mt-4 mb-3">County Statistics</h6>
+
+        <div class="table-responsive">
+            <table class="surveillance-table">
+                <thead>
+                    <tr>
+                        <th>County</th>
+                        <th>Registered Hospitals</th>
+                        <th>Reporting Hospitals</th>
+                        <th>Total Encounters</th>
+                        <th>Diagnosed Encounters</th>
+                    </tr>
+                </thead>
+                <tbody id="countyStatisticsTable">
+                    <tr>
+                        <td colspan="5">Loading county statistics...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h6 class="fw-bold mt-4 mb-3">County Disease Breakdown</h6>
+
+        <div id="countyDiseaseBreakdown">
+            Loading county disease breakdown...
+        </div>
+
+        <p class="text-secondary small mt-3 mb-0">
+            County figures represent encounters reported by hospitals
+            registered in each county. They do not establish the residence
+            of patients or population-level disease prevalence.
+        </p>
+    </div>
+
+    <!-- National disease burden analysis -->
+    <div class="surveillance-section">
+        <h5>National Disease Burden Analysis</h5>
+
+        <p class="text-secondary small">
+            This analysis ranks recorded diagnoses according to their
+            proportion of all diagnosed clinical encounters during the
+            selected reporting period.
+        </p>
+
+        <div class="row g-3 align-items-stretch mb-3">
+            <div class="col-12 col-xl-8">
+                <div class="surveillance-chart-card">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                        <h6 class="fw-bold mb-0">Leading Diagnoses by Recorded Encounters</h6>
+                        <span class="analysis-legend-note">Ranked highest to lowest</span>
+                    </div>
+                    <div class="analysis-chart-wrap tall">
+                        <canvas id="diseaseBurdenChart"></canvas>
+                    </div>
+                    <div id="diseaseBurdenChartStatus" class="diagnosis-chart-status">Waiting for disease burden data...</div>
+                </div>
+            </div>
+            <div class="col-12 col-xl-4">
+                <div class="row g-2 h-100">
+                    <div class="col-6 col-xl-12">
+                        <div class="analysis-kpi">
+                            <div class="caption">Diagnosed encounters represented</div>
+                            <div class="value" id="burdenEncounterTotal">--</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-xl-12">
+                        <div class="analysis-kpi">
+                            <div class="caption">Diagnoses in burden analysis</div>
+                            <div class="value" id="burdenDiagnosisTotal">--</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <p class="small text-secondary mb-0">The chart ranks diagnosis counts. The table below retains each diagnosis' national share and reporting-hospital coverage.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="surveillance-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Diagnosis</th>
+                        <th>Diagnosed Encounters</th>
+                        <th>National Share</th>
+                        <th>Reporting Hospitals</th>
+                        <th>Distribution</th>
+                    </tr>
+                </thead>
+                <tbody id="diseaseBurdenTable">
+                    <tr><td colspan="6">Loading disease burden analysis...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="alert alert-light border mt-3 mb-0">
+            <small class="text-secondary">
+                <strong>Interpretation:</strong>
+                National share represents the percentage of recorded diagnosed
+                encounters attributed to a particular diagnosis. It does not
+                represent the percentage of the population affected by that disease.
+            </small>
+        </div>
+    </div>
+
+    <!-- Hospital statistics -->
+    <div class="surveillance-section">
+        <h5>Hospital Reporting Statistics</h5>
+        <p class="text-secondary small">Compare the reporting volume and diagnosed encounters recorded by each registered hospital.</p>
+
+        <div class="surveillance-chart-card mb-3">
+            <div class="analysis-chart-wrap tall">
+                <canvas id="hospitalReportingChart"></canvas>
+            </div>
+            <div id="hospitalReportingChartStatus" class="diagnosis-chart-status">Waiting for hospital statistics...</div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="surveillance-table">
+                <thead>
+                    <tr>
+                        <th>Hospital</th>
+                        <th>Institution Code</th>
+                        <th>Total Encounters</th>
+                        <th>Diagnosed Encounters</th>
+                    </tr>
+                </thead>
+                <tbody id="institutionTable">
+                    <tr><td colspan="4">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Hospital diagnosis comparison graph and table -->
+    <div class="surveillance-section">
+        <h5>Diagnosis Comparison Across Hospitals</h5>
+
+        <p class="text-secondary small">
+            Compare the number of recorded encounters for each diagnosis
+            across hospitals contributing diagnosed clinical encounters.
+        </p>
+
+        <div class="hospital-comparison-chart-container">
+            <canvas id="hospitalDiagnosisComparisonChart"></canvas>
+        </div>
+
+        <div id="hospitalComparisonChartStatus" class="diagnosis-chart-status mb-3">
+            Waiting for hospital comparison data...
+        </div>
+
+        <h6 class="fw-bold mt-4 mb-3">Detailed Hospital Comparison</h6>
+
+        <div class="table-responsive">
+            <table class="surveillance-table surveillance-comparison-table">
+                <thead id="hospitalComparisonHead">
+                    <tr><th>Diagnosis</th><th>Loading...</th></tr>
+                </thead>
+                <tbody id="hospitalComparisonBody">
+                    <tr><td colspan="2">Loading comparison data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Monthly trend details -->
+    <div class="surveillance-section">
+        <h5>Monthly Trend Details</h5>
+
+        <p class="text-secondary small">
+            These bars represent total clinical encounters. Percentage changes compare
+            diagnosed encounters with the previous month.
+        </p>
+
+        <div class="row g-3 mb-3">
+            <div class="col-12 col-lg-8">
+                <div class="surveillance-chart-card">
+                    <h6 class="fw-bold">Monthly Encounter Volume</h6>
+                    <div class="analysis-chart-wrap">
+                        <canvas id="monthlyDetailChart"></canvas>
+                    </div>
+                    <div id="monthlyDetailChartStatus" class="diagnosis-chart-status">Waiting for monthly details...</div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-4">
+                <div class="row g-2 h-100">
+                    <div class="col-6 col-lg-12">
+                        <div class="analysis-kpi">
+                            <div class="caption">Months reported</div>
+                            <div class="value" id="monthlyPeriodCount">--</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-lg-12">
+                        <div class="analysis-kpi">
+                            <div class="caption">Months flagged for review</div>
+                            <div class="value" id="monthlyFlagCount">--</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <p class="small text-secondary mb-0">Diagnosed encounters are included within total encounters; the grouped bars compare the two measures and should not be added together.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="monthlyTrend" class="row g-3">
+            Loading monthly trends...
+        </div>
+    </div>
+
+    <!-- Disease-specific monthly trends -->
+    <div class="surveillance-section">
+        <h5>Disease-Specific Monthly Trends</h5>
+
+        <p class="text-secondary small">
+            Examine how individual recorded diagnoses change over time.
+            Each diagnosis has its own monthly encounter counts, percentage
+            changes and contributing hospitals.
+        </p>
+
+        <div id="diseaseSpecificTrends">
+            Loading disease-specific trends...
+        </div>
+    </div>
+
+    <!-- National surveillance alerts -->
+    <div class="surveillance-section">
+        <h5>National Surveillance Alerts</h5>
+
+        <p class="text-secondary small">
+            These alerts identify unusually large increases in overall recorded
+            diagnosed encounters and indicate where further investigation may be appropriate.
+        </p>
+
+        <div id="surveillanceAlerts">
+            Checking for unusual increases...
+        </div>
+    </div>
+
+    <!-- Disease-specific alerts -->
+    <div class="surveillance-section">
+        <h5>Disease-Specific Surveillance Alerts</h5>
+
+        <p class="text-secondary small">
+            These alerts identify individual diagnoses that meet the statistical
+            unusual-increase criteria. The contributing hospitals are displayed
+            to help guide further investigation.
+        </p>
+
+        <div id="diseaseSpecificAlerts">
+            Checking disease-specific alerts...
+        </div>
+    </div>
+
+    <!-- Reporting period -->
+    <div class="surveillance-section">
+        <h5>Reporting Period</h5>
+
+        <p class="mb-1">
+            <strong>From:</strong>
+            <span id="reportFrom">--</span>
+        </p>
+
+        <p class="mb-0">
+            <strong>To:</strong>
+            <span id="reportTo">--</span>
+        </p>
+    </div>
+
+    <div class="alert alert-info mt-4">
+        <strong>Data interpretation:</strong>
+        <span id="surveillanceDataNote">
+            These statistics represent recorded clinical encounters, not confirmed
+            disease incidence or unique patients. Diagnosis entries are currently
+            free text. An unusual increase is a statistical investigation indicator,
+            not proof of an outbreak. Further clinical and public-health investigation
+            is required.
+        </span>
+    </div>
+
+</div>
+
+<!-- Chart.js and Leaflet libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    (() => {
+        const formatNumber = value =>
+            Number(value ?? 0).toLocaleString();
+
+        const formatDate = value => {
+            if (!value) return "--";
+            return new Date(value).toLocaleDateString();
+        };
+
+        function escapeHtml(value) {
+            return String(value ?? "").replace(/[&<>"']/g, character => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            })[character]);
+        }
+
+        function formatChange(value) {
+            if (value === null || value === undefined) {
+                return "No previous cases available";
+            }
+
+            const change = Number(value);
+
+            if (change > 0) {
+                return `+${change.toFixed(2)}%`;
+            }
+
+            return `${change.toFixed(2)}%`;
+        }
+
+        function getTrendDirection(value) {
+            if (value === null || value === undefined) {
+                return {
+                    text: "Baseline unavailable",
+                    css: "surveillance-no-change"
+                };
+            }
+
+            const change = Number(value);
+
+            if (change > 0) {
+                return {
+                    text: "Increasing",
+                    css: "surveillance-increase"
+                };
+            }
+
+            if (change < 0) {
+                return {
+                    text: "Decreasing",
+                    css: "surveillance-decrease"
+                };
+            }
+
+            return {
+                text: "Stable",
+                css: "surveillance-no-change"
+            };
+        }
+
+        // ==========================================
+        // Chart instances
+        // ==========================================
+
+        let diagnosisDistributionChart = null;
+        let monthlyTrendChart = null;
+        let hospitalDiagnosisComparisonChart = null;
+        let countyComparisonChart = null;
+        let diseaseBurdenChart = null;
+        let hospitalReportingChart = null;
+        let monthlyDetailChart = null;
+        let diseaseTrendCharts = [];
+        let countyDiseaseCharts = [];
+
+        // ==========================================
+        // Diagnosis distribution doughnut chart
+        // ==========================================
+
+        function renderDiagnosisDistributionChart(diagnoses) {
+            const canvas =
+                document.getElementById("diagnosisDistributionChart");
+
+            const chartStatus =
+                document.getElementById("diagnosisChartStatus");
+
+            if (diagnosisDistributionChart) {
+                diagnosisDistributionChart.destroy();
+                diagnosisDistributionChart = null;
+            }
+
+            const diagnosisRecords = diagnoses || [];
+
+            if (typeof Chart === "undefined") {
+                chartStatus.textContent =
+                    "Chart.js could not be loaded. Check your internet connection.";
+                return;
+            }
+
+            if (diagnosisRecords.length === 0) {
+                chartStatus.textContent =
+                    "There are no recorded diagnoses for this reporting period.";
+                return;
+            }
+
+            const labels = diagnosisRecords.map(item =>
+                String(item.diagnosis ?? "Unspecified diagnosis")
+            );
+
+            const values = diagnosisRecords.map(item =>
+                Number(item.encounterCount ?? 0)
+            );
+
+            const totalEncounters = values.reduce(
+                (total, value) => total + value,
+                0
+            );
+
+            if (totalEncounters === 0) {
+                chartStatus.textContent =
+                    "There are no diagnosed encounters to display.";
+                return;
+            }
+
+            diagnosisDistributionChart = new Chart(canvas, {
+                type: "doughnut",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [{
+                        label: "Diagnosed Encounters",
+                        data: values,
+                        borderWidth: 2,
+                        hoverOffset: 8
+                    }]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "60%",
+
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: "right",
+
+                            labels: {
+                                padding: 12,
+                                usePointStyle: true,
+                                boxWidth: 10
+                            }
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = Number(context.raw ?? 0);
+
+                                    const percentage =
+                                        (value / totalEncounters) * 100;
+
+                                    return `${context.label}: ${formatNumber(value)} encounters (${percentage.toFixed(2)}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            chartStatus.textContent =
+                `${formatNumber(totalEncounters)} diagnosed encounters across ${formatNumber(diagnosisRecords.length)} recorded diagnoses.`;
+        }
+
+        // ==========================================
+        // NEW: Monthly encounters line graph
+        // ==========================================
+
+        function renderMonthlyTrendChart(monthlyData) {
+            const canvas =
+                document.getElementById("monthlyTrendChart");
+
+            const chartStatus =
+                document.getElementById("monthlyChartStatus");
+
+            if (monthlyTrendChart) {
+                monthlyTrendChart.destroy();
+                monthlyTrendChart = null;
+            }
+
+            const records = monthlyData || [];
+
+            if (typeof Chart === "undefined") {
+                chartStatus.textContent =
+                    "Chart.js could not be loaded. Check your internet connection.";
+                return;
+            }
+
+            if (records.length === 0) {
+                chartStatus.textContent =
+                    "No monthly encounter data is available.";
+                return;
+            }
+
+            const labels = records.map(item =>
+                String(item.month ?? "")
+            );
+
+            const totalValues = records.map(item =>
+                Number(item.totalEncounters ?? 0)
+            );
+
+            const diagnosedValues = records.map(item =>
+                Number(item.diagnosedEncounters ?? 0)
+            );
+
+            monthlyTrendChart = new Chart(canvas, {
+                type: "line",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [
+                        {
+                            label: "Total Encounters",
+                            data: totalValues,
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            fill: false
+                        },
+                        {
+                            label: "Diagnosed Encounters",
+                            data: diagnosedValues,
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 4,
+                            fill: false
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        intersect: false,
+                        mode: "index"
+                    },
+
+                    plugins: {
+                        legend: {
+                            position: "bottom"
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: context =>
+                                    `${context.dataset.label}: ${formatNumber(context.raw)}`
+                            }
+                        }
+                    },
+
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+
+                            title: {
+                                display: true,
+                                text: "Number of encounters"
+                            },
+
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+
+                        x: {
+                            title: {
+                                display: true,
+                                text: "Reporting month"
+                            }
+                        }
+                    }
+                }
+            });
+
+            chartStatus.textContent =
+                `${records.length} monthly reporting period(s) displayed.`;
+        }
+
+        // ==========================================
+        // NEW: Hospital diagnosis comparison graph
+        // ==========================================
+
+        function renderHospitalDiagnosisComparisonChart(records) {
+            const canvas =
+                document.getElementById("hospitalDiagnosisComparisonChart");
+
+            const chartStatus =
+                document.getElementById("hospitalComparisonChartStatus");
+
+            if (hospitalDiagnosisComparisonChart) {
+                hospitalDiagnosisComparisonChart.destroy();
+                hospitalDiagnosisComparisonChart = null;
+            }
+
+            const comparisonRecords = records || [];
+
+            if (typeof Chart === "undefined") {
+                chartStatus.textContent =
+                    "Chart.js could not be loaded. Check your internet connection.";
+                return;
+            }
+
+            if (comparisonRecords.length === 0) {
+                chartStatus.textContent =
+                    "No hospital diagnosis comparison data is available.";
+                return;
+            }
+
+            const hospitalMap = new Map();
+
+            comparisonRecords.forEach(item => {
+                const key = String(item.institutionCode ?? item.institutionName ?? "");
+
+                if (!hospitalMap.has(key)) {
+                    hospitalMap.set(key, {
+                        institutionCode: item.institutionCode,
+                        institutionName: item.institutionName
+                    });
+                }
+            });
+
+            const hospitals = Array.from(hospitalMap.values())
+                .sort((a, b) =>
+                    String(a.institutionName ?? "").localeCompare(
+                        String(b.institutionName ?? "")
+                    )
+                );
+
+            const diagnosisMap = new Map();
+
+            comparisonRecords.forEach(item => {
+                const diagnosisKey =
+                    String(item.diagnosis ?? "").trim().toLowerCase();
+
+                if (!diagnosisMap.has(diagnosisKey)) {
+                    diagnosisMap.set(diagnosisKey, {
+                        diagnosis: item.diagnosis,
+                        counts: new Map()
+                    });
+                }
+
+                const diagnosis = diagnosisMap.get(diagnosisKey);
+
+                const hospitalKey =
+                    String(item.institutionCode ?? item.institutionName ?? "");
+
+                diagnosis.counts.set(
+                    hospitalKey,
+                    Number(item.encounterCount ?? 0)
+                );
+            });
+
+            const diagnoses = Array.from(diagnosisMap.values())
+                .sort((a, b) =>
+                    String(a.diagnosis ?? "").localeCompare(
+                        String(b.diagnosis ?? "")
+                    )
+                );
+
+            const datasets = hospitals.map(hospital => {
+                const hospitalKey =
+                    String(hospital.institutionCode ?? hospital.institutionName ?? "");
+
+                return {
+                    label: hospital.institutionName,
+                    data: diagnoses.map(diagnosis =>
+                        diagnosis.counts.get(hospitalKey) ?? 0
+                    ),
+                    borderWidth: 1
+                };
+            });
+
+            hospitalDiagnosisComparisonChart = new Chart(canvas, {
+                type: "bar",
+
+                data: {
+                    labels: diagnoses.map(item => item.diagnosis),
+                    datasets: datasets
+                },
+
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    interaction: {
+                        intersect: false,
+                        mode: "index"
+                    },
+
+                    plugins: {
+                        legend: {
+                            position: "bottom"
+                        },
+
+                        tooltip: {
+                            callbacks: {
+                                label: context =>
+                                    `${context.dataset.label}: ${formatNumber(context.raw)} encounters`
+                            }
+                        }
+                    },
+
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+
+                            title: {
+                                display: true,
+                                text: "Recorded encounters"
+                            },
+
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+
+                        y: {
+                            title: {
+                                display: true,
+                                text: "Diagnosis"
+                            }
+                        }
+                    }
+                }
+            });
+
+            chartStatus.textContent =
+                `Comparing ${diagnoses.length} diagnosis(es) across ${hospitals.length} hospital(s).`;
+        }
+
+        // ==========================================
+        // National disease burden ranking chart
+        // ==========================================
+
+        function renderDiseaseBurdenChart(records) {
+            const canvas = document.getElementById("diseaseBurdenChart");
+            const status = document.getElementById("diseaseBurdenChartStatus");
+            if (diseaseBurdenChart) {
+                diseaseBurdenChart.destroy();
+                diseaseBurdenChart = null;
+            }
+
+            const items = [...(records || [])].sort(
+                (a, b) => Number(b.encounterCount ?? 0) - Number(a.encounterCount ?? 0)
+            );
+            const total = items.reduce((sum, item) => sum + Number(item.encounterCount ?? 0), 0);
+            document.getElementById("burdenEncounterTotal").textContent = formatNumber(total);
+            document.getElementById("burdenDiagnosisTotal").textContent = formatNumber(items.length);
+
+            if (typeof Chart === "undefined" || !items.length) {
+                status.textContent = items.length ? "Chart.js is unavailable." : "No disease burden data is available.";
+                return;
+            }
+
+            const shown = items.slice(0, 12);
+            diseaseBurdenChart = new Chart(canvas, {
+                type: "bar",
+                data: {
+                    labels: shown.map(x => x.diagnosis || "Unspecified"),
+                    datasets: [{
+                        label: "Diagnosed encounters",
+                        data: shown.map(x => Number(x.encounterCount ?? 0)),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => {
+                                    const item = shown[context.dataIndex];
+                                    return `${formatNumber(context.raw)} encounters (${Number(item.percentageOfDiagnosedEncounters ?? 0).toFixed(2)}% of diagnosed encounters)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: "Diagnosed encounters" } },
+                        y: { ticks: { autoSkip: false } }
+                    }
+                }
+            });
+            status.textContent = `Showing the top ${shown.length} of ${items.length} recorded diagnoses.`;
+        }
+
+        // ==========================================
+        // Hospital reporting volume chart
+        // ==========================================
+
+        function renderHospitalReportingChart(institutions) {
+            const canvas = document.getElementById("hospitalReportingChart");
+            const status = document.getElementById("hospitalReportingChartStatus");
+            if (hospitalReportingChart) {
+                hospitalReportingChart.destroy();
+                hospitalReportingChart = null;
+            }
+
+            const items = [...(institutions || [])].sort(
+                (a, b) => Number(b.encounterCount ?? 0) - Number(a.encounterCount ?? 0)
+            );
+            if (typeof Chart === "undefined" || !items.length) {
+                status.textContent = items.length ? "Chart.js is unavailable." : "No registered hospital statistics are available.";
+                return;
+            }
+
+            const shown = items.slice(0, 15);
+            hospitalReportingChart = new Chart(canvas, {
+                type: "bar",
+                data: {
+                    labels: shown.map(x => `${x.institutionName || "Hospital"} (${x.institutionCode || "N/A"})`),
+                    datasets: [
+                        { label: "Total encounters", data: shown.map(x => Number(x.encounterCount ?? 0)), borderWidth: 1 },
+                        { label: "Diagnosed encounters", data: shown.map(x => Number(x.diagnosedEncounters ?? 0)), borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: "index" },
+                    plugins: { legend: { position: "bottom" } },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: "Recorded encounters" } },
+                        y: { ticks: { autoSkip: false } }
+                    }
+                }
+            });
+            status.textContent = `Showing ${shown.length} hospital(s), ranked by total recorded encounters.`;
+        }
+
+        // ==========================================
+        // Monthly detail grouped column chart
+        // ==========================================
+
+        function renderMonthlyDetailChart(monthlyData) {
+            const canvas = document.getElementById("monthlyDetailChart");
+            const status = document.getElementById("monthlyDetailChartStatus");
+            if (monthlyDetailChart) {
+                monthlyDetailChart.destroy();
+                monthlyDetailChart = null;
+            }
+            const records = monthlyData || [];
+            const flagged = records.filter(x => x.isUnusualIncrease).length;
+            document.getElementById("monthlyPeriodCount").textContent = formatNumber(records.length);
+            document.getElementById("monthlyFlagCount").textContent = formatNumber(flagged);
+
+            if (typeof Chart === "undefined" || !records.length) {
+                status.textContent = records.length ? "Chart.js is unavailable." : "No monthly trend data is available.";
+                return;
+            }
+
+            monthlyDetailChart = new Chart(canvas, {
+                type: "bar",
+                data: {
+                    labels: records.map(x => x.month || ""),
+                    datasets: [
+                        { label: "Total encounters", data: records.map(x => Number(x.totalEncounters ?? 0)), borderWidth: 1 },
+                        { label: "Diagnosed encounters", data: records.map(x => Number(x.diagnosedEncounters ?? 0)), borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: "index" },
+                    plugins: {
+                        legend: { position: "bottom" },
+                        tooltip: { callbacks: { afterBody: items => {
+                            const record = records[items[0]?.dataIndex];
+                            return record?.isUnusualIncrease ? "Statistical investigation flag" : "";
+                        } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: "Encounters" } },
+                        x: { ticks: { maxRotation: 45, minRotation: 0 } }
+                    }
+                }
+            });
+            status.textContent = `${records.length} monthly period(s) displayed; ${flagged} month(s) flagged for investigation.`;
+        }
+
+        // ==========================================
+        // Kenya hospital distribution map
+        // ==========================================
+
+        let kenyaMap = null;
+        let hospitalMarkers = null;
+
+        function initialiseKenyaMap() {
+            if (kenyaMap) {
+                return;
+            }
+
+            if (typeof L === "undefined") {
+                document.getElementById("hospitalMapStatus").textContent =
+                    "The map library could not be loaded. Check your internet connection.";
+                return;
+            }
+
+            kenyaMap = L.map("kenyaHospitalMap").setView(
+                [-0.0236, 37.9062],
+                6
+            );
+
+            L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    attribution:
+                        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 18
+                }
+            ).addTo(kenyaMap);
+
+            hospitalMarkers = L.layerGroup().addTo(kenyaMap);
+        }
+
+        function renderHospitalMap(institutions) {
+            const status =
+                document.getElementById("hospitalMapStatus");
+
+            const registeredCount =
+                document.getElementById("registeredHospitalCount");
+
+            const mappedCount =
+                document.getElementById("mappedHospitalCount");
+
+            const missingCount =
+                document.getElementById("hospitalsWithoutCoordinates");
+
+            if (typeof L === "undefined") {
+                status.textContent =
+                    "Map library unavailable. Please check your internet connection.";
+                return;
+            }
+
+            initialiseKenyaMap();
+
+            if (!kenyaMap || !hospitalMarkers) {
+                return;
+            }
+
+            hospitalMarkers.clearLayers();
+
+            const allHospitals = institutions || [];
+
+            let mapped = 0;
+            let missing = 0;
+
+            allHospitals.forEach(hospital => {
+                const latitude = Number(hospital.latitude);
+                const longitude = Number(hospital.longitude);
+
+                const hasCoordinates =
+                    hospital.latitude !== null &&
+                    hospital.latitude !== undefined &&
+                    hospital.longitude !== null &&
+                    hospital.longitude !== undefined &&
+                    Number.isFinite(latitude) &&
+                    Number.isFinite(longitude) &&
+                    latitude >= -5 &&
+                    latitude <= 5.5 &&
+                    longitude >= 33.5 &&
+                    longitude <= 42.5;
+
+                if (!hasCoordinates) {
+                    missing++;
+                    return;
+                }
+
+                mapped++;
+
+                const popupContent = `
+                    <div class="hospital-map-popup">
+                        <strong>${escapeHtml(hospital.institutionName)}</strong>
+                        <hr class="my-2">
+
+                        <div>
+                            <strong>Institution code:</strong>
+                            ${escapeHtml(hospital.institutionCode)}
+                        </div>
+
+                        <div>
+                            <strong>County:</strong>
+                            ${escapeHtml(hospital.county || "Not recorded")}
+                        </div>
+
+                        <div>
+                            <strong>Sub-county:</strong>
+                            ${escapeHtml(hospital.subCounty || "Not recorded")}
+                        </div>
+
+                        <hr class="my-2">
+
+                        <div>
+                            <strong>Total encounters:</strong>
+                            ${formatNumber(hospital.encounterCount)}
+                        </div>
+
+                        <div>
+                            <strong>Diagnosed encounters:</strong>
+                            ${formatNumber(hospital.diagnosedEncounters)}
+                        </div>
+
+                        <div class="small text-secondary mt-2">
+                            Recorded clinical encounters during the selected reporting period.
+                        </div>
+                    </div>
+                `;
+
+                const marker = L.marker([latitude, longitude]);
+
+                marker.bindPopup(popupContent);
+                marker.addTo(hospitalMarkers);
+            });
+
+            registeredCount.textContent =
+                formatNumber(allHospitals.length);
+
+            mappedCount.textContent =
+                formatNumber(mapped);
+
+            missingCount.textContent =
+                formatNumber(missing);
+
+            if (mapped === 0) {
+                status.textContent =
+                    "No hospitals have valid geographical coordinates yet.";
+            } else {
+                status.textContent =
+                    `${mapped} hospital(s) displayed on the map. ` +
+                    `${missing} hospital(s) need geographical coordinates.`;
+            }
+
+            window.setTimeout(() => {
+                kenyaMap.invalidateSize();
+            }, 100);
+        }
+
+        // ==========================================
+        // County comparison chart and tables
+        // ==========================================
+
+        function renderCountyAnalysis(counties) {
+            const chartCanvas =
+                document.getElementById("countyComparisonChart");
+
+            const statisticsTable =
+                document.getElementById("countyStatisticsTable");
+
+            const diseaseBreakdown =
+                document.getElementById("countyDiseaseBreakdown");
+
+            const countyRecords = counties || [];
+
+            if (countyComparisonChart) {
+                countyComparisonChart.destroy();
+                countyComparisonChart = null;
+            }
+            countyDiseaseCharts.forEach(chart => chart.destroy());
+            countyDiseaseCharts = [];
+
+            if (countyRecords.length === 0) {
+                statisticsTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="surveillance-empty">
+                            No county statistics are available.
+                            Check whether registered hospitals have county assignments.
+                        </td>
+                    </tr>
+                `;
+
+                diseaseBreakdown.innerHTML = `
+                    <p class="surveillance-empty">
+                        No county disease breakdown is available.
+                    </p>
+                `;
+
+                return;
+            }
+
+            const sortedCounties = [...countyRecords].sort(
+                (a, b) =>
+                    Number(b.diagnosedEncounters ?? 0) -
+                    Number(a.diagnosedEncounters ?? 0)
+            );
+
+            if (typeof Chart !== "undefined") {
+                countyComparisonChart = new Chart(chartCanvas, {
+                    type: "bar",
+
+                    data: {
+                        labels: sortedCounties.map(
+                            county => county.county
+                        ),
+
+                        datasets: [{
+                            label: "Diagnosed Encounters",
+
+                            data: sortedCounties.map(
+                                county =>
+                                    Number(county.diagnosedEncounters ?? 0)
+                            ),
+
+                            borderWidth: 1
+                        }]
+                    },
+
+                    options: {
+                        indexAxis: "y",
+                        responsive: true,
+                        maintainAspectRatio: false,
+
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+
+                            tooltip: {
+                                callbacks: {
+                                    label: context =>
+                                        `${formatNumber(context.raw)} diagnosed encounters`
+                                }
+                            }
+                        },
+
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+
+                                title: {
+                                    display: true,
+                                    text: "Recorded diagnosed encounters"
+                                },
+
+                                ticks: {
+                                    precision: 0
+                                }
+                            },
+
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: "County"
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            statisticsTable.innerHTML = sortedCounties.map(county => `
+                <tr>
+                    <td>
+                        <strong>${escapeHtml(county.county)}</strong>
+                    </td>
+                    <td>${formatNumber(county.registeredHospitals)}</td>
+                    <td>${formatNumber(county.reportingHospitals)}</td>
+                    <td>${formatNumber(county.totalEncounters)}</td>
+                    <td class="surveillance-count">
+                        ${formatNumber(county.diagnosedEncounters)}
+                    </td>
+                </tr>
+            `).join("");
+
+            diseaseBreakdown.innerHTML = sortedCounties.map(county => {
+                const diseases = county.diseases || [];
+
+                const diseaseRows = diseases.length > 0
+                    ? diseases.map(disease => `
+                        <tr>
+                            <td>${escapeHtml(disease.diagnosis)}</td>
+                            <td>${formatNumber(disease.encounterCount)}</td>
+                            <td>${Number(
+                                disease.percentageOfCountyDiagnosedEncounters ?? 0
+                            ).toFixed(2)}%</td>
+                            <td>${formatNumber(disease.reportingHospitals)}</td>
+                        </tr>
+                    `).join("")
+                    : `
+                        <tr>
+                            <td colspan="4" class="surveillance-empty">
+                                No diagnosed encounters recorded for this county.
+                            </td>
+                        </tr>
+                    `;
+
+                return `
+                    <div class="county-disease-card">
+                        <div class="county-disease-heading">
+                            ${escapeHtml(county.county)}
+                        </div>
+
+                        <div class="small text-secondary mb-3">
+                            Diagnosed encounters:
+                            <strong>${formatNumber(county.diagnosedEncounters)}</strong>
+                        </div>
+
+                        <div class="analysis-chart-wrap compact mb-3">
+                            <canvas id="countyDiseaseChart${sortedCounties.indexOf(county)}"></canvas>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="surveillance-table">
+                                <thead>
+                                    <tr>
+                                        <th>Diagnosis</th>
+                                        <th>Encounters</th>
+                                        <th>County Share</th>
+                                        <th>Reporting Hospitals</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${diseaseRows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            if (typeof Chart !== "undefined") {
+                sortedCounties.forEach((county, index) => {
+                    const diseases = [...(county.diseases || [])]
+                        .sort((a, b) => Number(b.encounterCount ?? 0) - Number(a.encounterCount ?? 0))
+                        .slice(0, 8);
+                    const canvas = document.getElementById(`countyDiseaseChart${index}`);
+                    if (!canvas || !diseases.length) return;
+
+                    const chart = new Chart(canvas, {
+                        type: "bar",
+                        data: {
+                            labels: diseases.map(item => item.diagnosis || "Unspecified"),
+                            datasets: [{
+                                label: "Diagnosed encounters",
+                                data: diseases.map(item => Number(item.encounterCount ?? 0)),
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            indexAxis: "y",
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { beginAtZero: true, ticks: { precision: 0 } },
+                                y: { ticks: { autoSkip: false } }
+                            }
+                        }
+                    });
+                    countyDiseaseCharts.push(chart);
+                });
+            }
+        }
+
+        // ==========================================
+        // Disease-specific trends
+        // ==========================================
+
+        function renderDiseaseSpecificTrends(trends) {
+            const container = document.getElementById("diseaseSpecificTrends");
+            diseaseTrendCharts.forEach(chart => chart.destroy());
+            diseaseTrendCharts = [];
+
+            if (!trends || trends.length === 0) {
+                container.innerHTML = `<p class="surveillance-empty">No disease-specific monthly trend data is available for this reporting period.</p>`;
+                return;
+            }
+
+            container.innerHTML = trends.map((disease, index) => {
+                const monthlyData = disease.monthlyData || [];
+                const totalEncounters = monthlyData.reduce(
+                    (total, point) => total + Number(point.encounterCount ?? 0), 0
+                );
+
+                const rows = monthlyData.map(point => {
+                    const direction = getTrendDirection(point.percentageChange);
+                    const hospitals = point.hospitalBreakdown || [];
+                    const hospitalDetails = hospitals.length
+                        ? hospitals.map(hospital => `<div class="hospital-contribution">${escapeHtml(hospital.institutionName)} (${escapeHtml(hospital.institutionCode)}): ${formatNumber(hospital.encounterCount)} encounters</div>`).join("")
+                        : '<span class="text-secondary">No contributing hospitals</span>';
+
+                    return `
+                        <tr class="${point.isUnusualIncrease ? "disease-month-alert" : ""}">
+                            <td><strong>${escapeHtml(point.month)}</strong>${point.isUnusualIncrease ? '<div class="text-danger small fw-bold">Investigation flag</div>' : ""}</td>
+                            <td>${formatNumber(point.encounterCount)}</td>
+                            <td><span class="${direction.css} trend-direction">${escapeHtml(formatChange(point.percentageChange))}</span></td>
+                            <td><span class="${direction.css} trend-direction">${escapeHtml(direction.text)}</span></td>
+                            <td>${formatNumber(hospitals.length)} ${hospitals.length === 1 ? "hospital" : "hospitals"}${hospitalDetails}</td>
+                        </tr>`;
+                }).join("");
+
+                return `
+                    <div class="disease-trend-card">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div class="disease-trend-heading mb-0">${escapeHtml(disease.diagnosis)}</div>
+                            <span class="badge text-bg-light border">${formatNumber(totalEncounters)} encounters</span>
+                        </div>
+                        <div class="disease-trend-chart">
+                            <canvas id="diseaseTrendChart${index}"></canvas>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="surveillance-table">
+                                <thead><tr><th>Month</th><th>Encounters</th><th>Monthly Change</th><th>Trend Direction</th><th>Hospital Contributions</th></tr></thead>
+                                <tbody>${rows || '<tr><td colspan="5" class="surveillance-empty">No monthly records for this diagnosis.</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>`;
+            }).join("");
+
+            if (typeof Chart !== "undefined") {
+                trends.forEach((disease, index) => {
+                    const monthlyData = disease.monthlyData || [];
+                    const canvas = document.getElementById(`diseaseTrendChart${index}`);
+                    if (!canvas || !monthlyData.length) return;
+                    const chart = new Chart(canvas, {
+                        type: "line",
+                        data: {
+                            labels: monthlyData.map(point => point.month || ""),
+                            datasets: [{
+                                label: `${disease.diagnosis} encounters`,
+                                data: monthlyData.map(point => Number(point.encounterCount ?? 0)),
+                                tension: 0.3,
+                                fill: true,
+                                borderWidth: 2,
+                                pointRadius: 3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { callbacks: { afterLabel: context => {
+                                    const point = monthlyData[context.dataIndex];
+                                    return point?.isUnusualIncrease ? "Investigation flag: unusual increase" : "";
+                                } } }
+                            },
+                            scales: {
+                                y: { beginAtZero: true, ticks: { precision: 0 }, title: { display: true, text: "Encounters" } },
+                                x: { ticks: { maxRotation: 45, minRotation: 0 } }
+                            }
+                        }
+                    });
+                    diseaseTrendCharts.push(chart);
+                });
+            }
+        }
+
+                function renderDiseaseSpecificAlerts(trends) {
+            const container =
+                document.getElementById("diseaseSpecificAlerts");
+
+            const alerts = [];
+
+            (trends || []).forEach(disease => {
+                (disease.monthlyData || []).forEach(point => {
+                    if (point.isUnusualIncrease) {
+                        alerts.push({
+                            diagnosis: disease.diagnosis,
+                            ...point
+                        });
+                    }
+                });
+            });
+
+            if (alerts.length === 0) {
+                container.innerHTML = `
+                    <div class="surveillance-status">
+                        <strong>No disease-specific unusual increases detected.</strong>
+
+                        <p class="mb-0 mt-1 text-secondary">
+                            No individual diagnosis met the current statistical
+                            alert criteria during this reporting period.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `<div class="surveillance-alert-grid">${alerts.map(alert => {
+                const hospitals = alert.hospitalBreakdown || [];
+
+                const hospitalList = hospitals.length > 0
+                    ? hospitals.map(hospital => `
+                        <li>
+                            <strong>${escapeHtml(hospital.institutionName)}</strong>
+                            (${escapeHtml(hospital.institutionCode)}):
+                            ${formatNumber(hospital.encounterCount)} encounters
+                        </li>
+                    `).join("")
+                    : "<li>No hospital contribution details available.</li>";
+
+                return `
+                    <div class="surveillance-alert">
+                        <div class="surveillance-alert-title">
+                            Unusual increase: ${escapeHtml(alert.diagnosis)}
+                        </div>
+
+                        <p class="mb-1">
+                            Reporting month:
+                            <strong>${escapeHtml(alert.month)}</strong>
+                        </p>
+
+                        <p class="mb-1">
+                            Recorded encounters:
+                            <strong>${formatNumber(alert.encounterCount)}</strong>
+                        </p>
+
+                        <p class="mb-2">
+                            Month-on-month increase:
+                            <strong>
+                                ${escapeHtml(formatChange(alert.percentageChange))}
+                            </strong>
+                        </p>
+
+                        <strong class="small">Contributing hospitals:</strong>
+
+                        <ul class="small mt-1 mb-2">
+                            ${hospitalList}
+                        </ul>
+
+                        <p class="mb-0 small text-secondary">
+                            This is a statistical signal requiring further
+                            investigation. It does not confirm an outbreak.
+                        </p>
+                    </div>
+                `;
+            }).join("")}</div>`;
+        }
+
+        // ==========================================
+        // Load national surveillance data
+        // ==========================================
+
+        let filterOptionsInitialised = false;
+
+        function populateSurveillanceFilterOptions(data) {
+            if (filterOptionsInitialised) return;
+
+            const diagnosisSelect = document.getElementById("filterDiagnosis");
+            const countySelect = document.getElementById("filterCounty");
+            const hospitalSelect = document.getElementById("filterHospital");
+
+            const diagnoses = (data.diagnoses || [])
+                .map(x => String(x.diagnosis || "").trim())
+                .filter(Boolean)
+                .sort((a, b) => a.localeCompare(b));
+
+            const counties = [...new Set((data.counties || [])
+                .map(x => String(x.county || "").trim())
+                .filter(Boolean))]
+                .sort((a, b) => a.localeCompare(b));
+
+            const hospitals = (data.institutions || [])
+                .filter(x => x.institutionCode && x.institutionName)
+                .sort((a, b) => String(a.institutionName).localeCompare(String(b.institutionName)));
+            window.__surveillanceHospitalOptions = hospitals;
+
+            diagnoses.forEach(value => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = value;
+                diagnosisSelect.appendChild(option);
+            });
+
+            counties.forEach(value => {
+                const option = document.createElement("option");
+                option.value = value;
+                option.textContent = value;
+                countySelect.appendChild(option);
+            });
+
+            hospitals.forEach(hospital => {
+                const option = document.createElement("option");
+                option.value = hospital.institutionCode;
+                option.textContent = `${hospital.institutionName} (${hospital.institutionCode})`;
+                hospitalSelect.appendChild(option);
+            });
+
+            filterOptionsInitialised = true;
+        }
+
+        function buildSurveillanceQuery() {
+            const params = new URLSearchParams();
+            const from = document.getElementById("filterFromUtc").value;
+            const to = document.getElementById("filterToUtc").value;
+            const diagnosis = document.getElementById("filterDiagnosis").value;
+            const county = document.getElementById("filterCounty").value;
+            const institutionCode = document.getElementById("filterHospital").value;
+
+            if (from) params.set("fromUtc", `${from}T00:00:00Z`);
+            if (to) params.set("toUtc", `${to}T23:59:59.999Z`);
+            if (diagnosis) params.set("diagnosis", diagnosis);
+            if (county) params.set("county", county);
+            if (institutionCode) params.set("institutionCode", institutionCode);
+
+            return params.toString();
+        }
+
+        function updateActiveFilterDescription() {
+            const labels = [];
+            const from = document.getElementById("filterFromUtc").value;
+            const to = document.getElementById("filterToUtc").value;
+            const diagnosis = document.getElementById("filterDiagnosis").value;
+            const county = document.getElementById("filterCounty").value;
+            const hospital = document.getElementById("filterHospital");
+            if (from) labels.push(`From ${from}`);
+            if (to) labels.push(`To ${to}`);
+            if (diagnosis) labels.push(`Diagnosis: ${diagnosis}`);
+            if (county) labels.push(`County: ${county}`);
+            if (hospital.value) labels.push(`Hospital: ${hospital.options[hospital.selectedIndex].text}`);
+            document.getElementById("activeSurveillanceFilters").textContent =
+                labels.length ? `Active filters — ${labels.join(" | ")}` : "Showing all available surveillance data.";
+        }
+
+        async function loadNationalSurveillance() {
+            const status =
+                document.getElementById("surveillanceStatus");
+
+            status.className = "surveillance-status";
+            status.textContent = "Loading national surveillance data...";
+
+            try {
+                const surveillanceToken =
+                    localStorage.getItem("hospitalRepositoryToken");
+
+                if (!surveillanceToken) {
+                    throw new Error(
+                        "Please log in before accessing national surveillance."
+                    );
+                }
+
+                const queryString = buildSurveillanceQuery();
+                const requestUrl = queryString
+                    ? `/api/surveillance/overview?${queryString}`
+                    : "/api/surveillance/overview";
+
+                const response = await fetch(requestUrl, {
+                    headers: {
+                        "Authorization": `Bearer ${surveillanceToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.message || `Request failed: ${response.status}`
+                    );
+                }
+
+                populateSurveillanceFilterOptions(data);
+                updateActiveFilterDescription();
+
+                // Summary statistics
+                document.getElementById("totalEncounters").textContent =
+                    formatNumber(data.totalEncounters);
+
+                document.getElementById("diagnosedEncounters").textContent =
+                    formatNumber(data.diagnosedEncounters);
+
+                document.getElementById("reportingHospitals").textContent =
+                    formatNumber(data.reportingHospitals);
+
+                document.getElementById("diagnosisCount").textContent =
+                    formatNumber(data.diagnoses?.length);
+
+                document.getElementById("reportFrom").textContent =
+                    formatDate(data.fromUtc);
+
+                document.getElementById("reportTo").textContent =
+                    formatDate(data.toUtc);
+
+                if (data.dataNote) {
+                    document.getElementById("surveillanceDataNote").textContent =
+                        data.dataNote;
+                }
+
+                // Hospital distribution map
+                renderHospitalMap(data.institutions || []);
+
+                // County analysis
+                renderCountyAnalysis(data.counties || []);
+
+                // Diagnosis doughnut chart
+                renderDiagnosisDistributionChart(data.diagnoses || []);
+
+                // Monthly line chart
+                renderMonthlyTrendChart(data.monthlyTrend || []);
+
+                // Diagnosis distribution table
+                const diagnosisTable =
+                    document.getElementById("diagnosisTable");
+
+                if (!data.diagnoses || data.diagnoses.length === 0) {
+                    diagnosisTable.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="surveillance-empty">
+                                No recorded diagnoses in this reporting period.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    diagnosisTable.innerHTML = data.diagnoses.map(item => `
+                        <tr>
+                            <td>${escapeHtml(item.diagnosis)}</td>
+                            <td>${formatNumber(item.encounterCount)}</td>
+                            <td>${formatNumber(item.reportingHospitals)}</td>
+                        </tr>
+                    `).join("");
+                }
+
+                // National disease burden analysis
+                const diseaseBurdenTable =
+                    document.getElementById("diseaseBurdenTable");
+
+                const diseaseBurden = data.diseaseBurden || [];
+                renderDiseaseBurdenChart(diseaseBurden);
+
+                if (diseaseBurden.length === 0) {
+                    diseaseBurdenTable.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="surveillance-empty">
+                                No disease burden data is available for this reporting period.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    diseaseBurdenTable.innerHTML = diseaseBurden.map((item, index) => {
+                        const share = Math.max(
+                            0,
+                            Math.min(
+                                100,
+                                Number(item.percentageOfDiagnosedEncounters ?? 0)
+                            )
+                        );
+
+                        return `
+                            <tr>
+                                <td class="surveillance-rank">#${index + 1}</td>
+
+                                <td>
+                                    <strong>${escapeHtml(item.diagnosis)}</strong>
+                                </td>
+
+                                <td>${formatNumber(item.encounterCount)}</td>
+
+                                <td class="surveillance-percentage">
+                                    ${share.toFixed(2)}%
+                                </td>
+
+                                <td>${formatNumber(item.reportingHospitals)}</td>
+
+                                <td>
+                                    <div class="surveillance-burden-bar">
+                                        <div class="surveillance-burden-fill"
+                                             style="width: ${share}%">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join("");
+                }
+
+                // Hospital reporting statistics and ranked chart
+                const institutionTable =
+                    document.getElementById("institutionTable");
+                renderHospitalReportingChart(data.institutions || []);
+
+                if (!data.institutions || data.institutions.length === 0) {
+                    institutionTable.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="surveillance-empty">
+                                No registered hospitals are available.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    institutionTable.innerHTML = data.institutions.map(item => `
+                        <tr>
+                            <td>${escapeHtml(item.institutionName)}</td>
+                            <td>${escapeHtml(item.institutionCode)}</td>
+                            <td>${formatNumber(item.encounterCount)}</td>
+                            <td>${formatNumber(item.diagnosedEncounters)}</td>
+                        </tr>
+                    `).join("");
+                }
+
+                // Diagnosis comparison across reporting hospitals
+                const comparisonHead =
+                    document.getElementById("hospitalComparisonHead");
+
+                const comparisonBody =
+                    document.getElementById("hospitalComparisonBody");
+
+                const comparisonRecords =
+                    data.hospitalDiagnosisComparison || [];
+
+                // Render the new hospital comparison graph
+                renderHospitalDiagnosisComparisonChart(comparisonRecords);
+
+                if (comparisonRecords.length === 0) {
+                    comparisonHead.innerHTML = `
+                        <tr><th>Diagnosis</th></tr>
+                    `;
+
+                    comparisonBody.innerHTML = `
+                        <tr>
+                            <td class="surveillance-empty">
+                                No diagnosis comparison data is available
+                                for this reporting period.
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    const hospitalMap = new Map();
+
+                    comparisonRecords.forEach(item => {
+                        const hospitalKey = item.institutionCode;
+
+                        if (!hospitalMap.has(hospitalKey)) {
+                            hospitalMap.set(hospitalKey, {
+                                institutionCode: item.institutionCode,
+                                institutionName: item.institutionName
+                            });
+                        }
+                    });
+
+                    const hospitals = Array.from(hospitalMap.values())
+                        .sort((a, b) =>
+                            a.institutionName.localeCompare(b.institutionName)
+                        );
+
+                    const diagnosisMap = new Map();
+
+                    comparisonRecords.forEach(item => {
+                        const diagnosisKey =
+                            String(item.diagnosis ?? "").trim().toLowerCase();
+
+                        if (!diagnosisMap.has(diagnosisKey)) {
+                            diagnosisMap.set(diagnosisKey, {
+                                diagnosis: item.diagnosis,
+                                counts: new Map()
+                            });
+                        }
+
+                        const diagnosis = diagnosisMap.get(diagnosisKey);
+
+                        diagnosis.counts.set(
+                            item.institutionCode,
+                            Number(item.encounterCount ?? 0)
+                        );
+                    });
+
+                    const diagnosisRows = Array.from(diagnosisMap.values())
+                        .sort((a, b) =>
+                            a.diagnosis.localeCompare(b.diagnosis)
+                        );
+
+                    comparisonHead.innerHTML = `
+                        <tr>
+                            <th>Diagnosis</th>
+
+                            ${hospitals.map(hospital => `
+                                <th>
+                                    ${escapeHtml(hospital.institutionName)}
+                                    <small class="d-block text-secondary">
+                                        ${escapeHtml(hospital.institutionCode)}
+                                    </small>
+                                </th>
+                            `).join("")}
+
+                            <th>Total</th>
+                        </tr>
+                    `;
+
+                    comparisonBody.innerHTML = diagnosisRows.map(row => {
+                        let total = 0;
+
+                        const hospitalCells = hospitals.map(hospital => {
+                            const count =
+                                row.counts.get(hospital.institutionCode) ?? 0;
+
+                            total += count;
+
+                            return `
+                                <td class="surveillance-count">
+                                    ${formatNumber(count)}
+                                </td>
+                            `;
+                        }).join("");
+
+                        return `
+                            <tr>
+                                <td>${escapeHtml(row.diagnosis)}</td>
+                                ${hospitalCells}
+                                <td class="surveillance-count">
+                                    ${formatNumber(total)}
+                                </td>
+                            </tr>
+                        `;
+                    }).join("");
+                }
+
+                // Overall monthly trend details and national alerts
+                renderMonthlyDetailChart(data.monthlyTrend || []);
+                const monthlyTrend =
+                    document.getElementById("monthlyTrend");
+
+                const surveillanceAlerts =
+                    document.getElementById("surveillanceAlerts");
+
+                const alerts = [];
+
+                if (!data.monthlyTrend || data.monthlyTrend.length === 0) {
+                    monthlyTrend.innerHTML = `
+                        <p class="surveillance-empty">
+                            No monthly records available.
+                        </p>
+                    `;
+                } else {
+                    const maximum = Math.max(
+                        ...data.monthlyTrend.map(x =>
+                            Number(x.totalEncounters ?? 0)
+                        ),
+                        1
+                    );
+
+                    monthlyTrend.innerHTML = data.monthlyTrend.map(item => {
+                        const percentage =
+                            (Number(item.totalEncounters ?? 0) / maximum) * 100;
+
+                        let changeText = "No previous month available";
+                        let changeClass = "surveillance-no-change";
+
+                        if (
+                            item.percentageChange !== null &&
+                            item.percentageChange !== undefined
+                        ) {
+                            const change = Number(item.percentageChange);
+
+                            if (change > 0) {
+                                changeText =
+                                    `${change}% increase in diagnosed encounters`;
+                                changeClass = "surveillance-increase";
+                            } else if (change < 0) {
+                                changeText =
+                                    `${Math.abs(change)}% decrease in diagnosed encounters`;
+                                changeClass = "surveillance-decrease";
+                            } else {
+                                changeText =
+                                    "No change in diagnosed encounters";
+                            }
+                        }
+
+                        if (item.isUnusualIncrease) {
+                            alerts.push(item);
+                        }
+
+                        return `
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="analysis-kpi">
+                                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                        <strong>${escapeHtml(item.month)}</strong>
+                                        ${item.isUnusualIncrease ? '<span class="badge text-bg-danger">Review</span>' : '<span class="badge text-bg-light border">Recorded</span>'}
+                                    </div>
+                                    <div class="value">${formatNumber(item.totalEncounters)}</div>
+                                    <div class="caption mb-2">Total encounters</div>
+                                    <div class="surveillance-bar mb-2">
+                                        <div class="surveillance-bar-fill" style="width: ${percentage}%"></div>
+                                    </div>
+                                    <div class="d-flex flex-wrap justify-content-between gap-2 small">
+                                        <span class="text-secondary">Diagnosed: ${formatNumber(item.diagnosedEncounters)}</span>
+                                        <span class="${changeClass}">${escapeHtml(changeText)}</span>
+                                    </div>
+                                    ${item.isUnusualIncrease ? '<div class="text-danger small fw-bold mt-2">Unusual increase flagged for investigation</div>' : ""}
+                                </div>
+                            </div>
+                        `;
+                    }).join("");
+                }
+
+                // National alerts
+                if (alerts.length === 0) {
+                    surveillanceAlerts.innerHTML = `
+                        <div class="surveillance-status">
+                            <strong>No unusual increases detected.</strong>
+                            <p class="mb-0 mt-1 text-secondary">
+                                No monthly increase met the current statistical
+                                alert criteria during this reporting period.
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    surveillanceAlerts.innerHTML = `<div class="surveillance-alert-grid">${alerts.map(item => `
+                        <div class="surveillance-alert">
+                            <div class="surveillance-alert-title">
+                                Unusual increase detected:
+                                ${escapeHtml(item.month)}
+                            </div>
+
+                            <p class="mb-1">
+                                Diagnosed encounters increased by
+                                <strong>
+                                    ${formatNumber(item.percentageChange)}%
+                                </strong>
+                                compared with the previous month.
+                            </p>
+
+                            <small class="text-secondary">
+                                Current month:
+                                ${formatNumber(item.diagnosedEncounters)}
+                                diagnosed encounters.
+                            </small>
+
+                            <p class="mb-0 mt-2 small">
+                                This is a statistical signal requiring further
+                                investigation. It does not confirm an outbreak.
+                            </p>
+                        </div>
+                    `).join("")}</div>`;
+                }
+
+                // Disease-specific trends and alerts
+                const diseaseTrends = data.diseaseMonthlyTrends || [];
+
+                renderDiseaseSpecificTrends(diseaseTrends);
+                renderDiseaseSpecificAlerts(diseaseTrends);
+
+                status.className = "surveillance-status text-success";
+                status.textContent =
+                    "National surveillance data loaded successfully.";
+
+            } catch (error) {
+                console.error("National surveillance error:", error);
+
+                status.className = "surveillance-status text-danger";
+                status.textContent =
+                    error.message ||
+                    "Unable to load national surveillance data.";
+            }
+        }
+
+        document.getElementById("applySurveillanceFilters")
+            .addEventListener("click", () => {
+                const from = document.getElementById("filterFromUtc").value;
+                const to = document.getElementById("filterToUtc").value;
+                if (from && to && from > to) {
+                    const status = document.getElementById("surveillanceStatus");
+                    status.className = "surveillance-status text-danger";
+                    status.textContent = "The start date must be on or before the end date.";
+                    return;
+                }
+                loadNationalSurveillance();
+            });
+
+        document.getElementById("resetSurveillanceFilters")
+            .addEventListener("click", () => {
+                document.getElementById("filterFromUtc").value = "";
+                document.getElementById("filterToUtc").value = "";
+                document.getElementById("filterDiagnosis").value = "";
+                document.getElementById("filterCounty").value = "";
+                document.getElementById("filterHospital").value = "";
+                loadNationalSurveillance();
+            });
+
+        document.getElementById("filterCounty")
+            .addEventListener("change", () => {
+                // A selected county narrows the hospital choices to that county.
+                const county = document.getElementById("filterCounty").value;
+                const hospitalSelect = document.getElementById("filterHospital");
+                const previous = hospitalSelect.value;
+                Array.from(hospitalSelect.options).forEach((option, index) => {
+                    if (index === 0) return;
+                    const hospitalData = window.__surveillanceHospitalOptions?.find(x => x.institutionCode === option.value);
+                    option.hidden = !!county && hospitalData && String(hospitalData.county || "").toLowerCase() !== county.toLowerCase();
+                });
+                if (previous && hospitalSelect.selectedOptions[0]?.hidden) hospitalSelect.value = "";
+            });
+
+        document.getElementById("refreshSurveillance")
+            .addEventListener("click", loadNationalSurveillance);
+
+        loadNationalSurveillance();
+    })();
+</script>

@@ -1,0 +1,1479 @@
+﻿
+@page
+@model HospitalRepository.Web.Pages.Clinical.Patients.DetailsModel
+
+@{
+    ViewData["Title"] = "Patient Medical Record";
+}
+
+<div class="container-fluid mt-4 px-3 px-lg-4">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <p class="text-muted mb-1">Clinical Workspace / Patient Records</p>
+            <h2 class="fw-bold mb-1">Patient Medical Record</h2>
+            <p class="text-muted">Complete clinical history of the selected patient.</p>
+        </div>
+
+        <a href="/Patients/Dashboard" class="btn btn-outline-secondary">
+            Back to Patient Directory
+        </a>
+    </div>
+
+    <div id="message" class="alert d-none" role="alert"></div>
+
+    <!-- PATIENT INFORMATION -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4" id="patientDetails">
+            Loading patient information...
+        </div>
+    </div>
+
+    <!-- RECORD PATIENT VISIT -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-1">Record Patient Visit</h5>
+            <p class="text-muted small mb-4">
+                Record a new clinical encounter for this patient.
+            </p>
+
+            <form id="encounterForm">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="encounterInstitutionId" class="form-label">
+                            Hospital / Institution
+                        </label>
+                        <select class="form-select" id="encounterInstitutionId" required>
+                            <option value="">Loading institutions...</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="encounterStartUtc" class="form-label">
+                            Visit Date and Time
+                        </label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="encounterStartUtc"
+                               required />
+                    </div>
+
+                    <div class="col-12">
+                        <label for="encounterReason" class="form-label">
+                            Reason for Visit
+                        </label>
+                        <textarea class="form-control"
+                                  id="encounterReason"
+                                  rows="2"
+                                  required></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="encounterDiagnosis" class="form-label">
+                            Diagnosis
+                        </label>
+                        <textarea class="form-control"
+                                  id="encounterDiagnosis"
+                                  rows="2"></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="encounterProcedure" class="form-label">
+                            Procedure
+                        </label>
+                        <textarea class="form-control"
+                                  id="encounterProcedure"
+                                  rows="2"></textarea>
+                    </div>
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary mt-4"
+                        id="saveEncounterButton">
+                    Save Patient Visit
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- CLINICAL ENCOUNTERS -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold">Clinical Encounters</h5>
+                    <p class="text-muted small mb-0">
+                        Patient visits, diagnoses and procedures.
+                    </p>
+                </div>
+                <span class="badge bg-primary" id="encounterCount">0</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Visit Date</th>
+                            <th>Hospital</th>
+                            <th>Reason</th>
+                            <th>Diagnosis</th>
+                            <th>Procedure</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="encounters">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">
+                                Loading encounters...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- RECORD LABORATORY RESULT -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-1">Record Laboratory Result</h5>
+            <p class="text-muted small mb-4">
+                Enter laboratory tests and their results for this patient.
+            </p>
+
+            <form id="laboratoryForm">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="labDisplay" class="form-label">
+                            Laboratory Test Name
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="labDisplay"
+                               placeholder="e.g. Full Blood Count"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="labCode" class="form-label">
+                            Laboratory Test Code
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="labCode"
+                               placeholder="e.g. CBC"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="labNumericValue" class="form-label">
+                            Numeric Result
+                        </label>
+                        <input type="number"
+                               step="any"
+                               class="form-control"
+                               id="labNumericValue"
+                               placeholder="e.g. 13.5" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="labTextValue" class="form-label">
+                            Text Result
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="labTextValue"
+                               placeholder="e.g. Positive or Negative" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="labUnit" class="form-label">
+                            Unit of Measurement
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="labUnit"
+                               placeholder="e.g. g/dL, mmol/L" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="labEffectiveUtc" class="form-label">
+                            Test Date and Time
+                        </label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="labEffectiveUtc"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="labEncounterId" class="form-label">
+                            Related Clinical Encounter
+                        </label>
+                        <select class="form-select" id="labEncounterId">
+                            <option value="">No related encounter</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="labStatus" class="form-label">
+                            Result Status
+                        </label>
+                        <select class="form-select" id="labStatus" required>
+                            <option value="final">Final</option>
+                            <option value="preliminary">Preliminary</option>
+                            <option value="registered">Registered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary mt-4"
+                        id="saveLaboratoryButton">
+                    Save Laboratory Result
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- LABORATORY RESULTS TABLE -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold">Laboratory Results</h5>
+                    <p class="text-muted small mb-0">
+                        Laboratory tests and recorded results.
+                    </p>
+                </div>
+                <span class="badge bg-info text-dark" id="labCount">0</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Test</th>
+                            <th>Code</th>
+                            <th>Result</th>
+                            <th>Unit</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laboratoryResults">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">
+                                Loading laboratory results...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- NEW: CLINICAL ANALYSIS -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+                <div>
+                    <p class="text-primary small fw-semibold mb-1">
+                        PATIENT INTELLIGENCE
+                    </p>
+                    <h5 class="fw-bold mb-1">Clinical Analysis</h5>
+                    <p class="text-muted small mb-0">
+                        Analysis of recorded laboratory history and changes over time.
+                    </p>
+                </div>
+
+                <button type="button"
+                        class="btn btn-outline-primary btn-sm"
+                        id="refreshAnalysisButton">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Refresh Analysis
+                </button>
+            </div>
+
+            <div id="analysisLoading" class="text-muted py-3">
+                Analysing patient laboratory history...
+            </div>
+
+            <div id="clinicalAnalysis" class="d-none">
+
+                <!-- SUMMARY CARDS -->
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-3 col-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted">Total Results</small>
+                            <h3 class="fw-bold mb-0" id="analysisTotalResults">0</h3>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted">Distinct Tests</small>
+                            <h3 class="fw-bold mb-0" id="analysisDistinctTests">0</h3>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted">Repeated Tests</small>
+                            <h3 class="fw-bold mb-0" id="analysisRepeatedTests">0</h3>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted">Latest Result</small>
+                            <div class="fw-semibold mt-1" id="analysisLatestResult">
+                                Not recorded
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TEST TRENDS -->
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">Laboratory Test Trends</h6>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Test</th>
+                                    <th>Results Recorded</th>
+                                    <th>Earliest Value</th>
+                                    <th>Latest Value</th>
+                                    <th>Change</th>
+                                    <th>Trend</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="analysisTrends">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        Loading trends...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- GENERATED OBSERVATIONS -->
+                <div class="mb-4">
+                    <h6 class="fw-bold mb-3">Generated Clinical Observations</h6>
+
+                    <div id="analysisObservations">
+                        <p class="text-muted">
+                            No observations available.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- DISCLAIMER -->
+                <div class="alert alert-warning mb-0">
+                    <strong>Clinical interpretation notice</strong>
+                    <p class="mb-0 mt-1 small" id="analysisDisclaimer">
+                        This analysis is intended to support the review of recorded
+                        information. It does not replace professional clinical judgement.
+                    </p>
+                </div>
+
+            </div>
+
+            <div id="analysisError" class="alert alert-danger d-none mb-0"></div>
+
+        </div>
+    </div>
+
+    <!-- RECORD MEDICATION -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-1">Record Medication</h5>
+            <p class="text-muted small mb-4">
+                Record medication prescribed to this patient.
+            </p>
+
+            <form id="medicationForm">
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label for="medicationName" class="form-label">
+                            Medication Name
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="medicationName"
+                               placeholder="e.g. Paracetamol"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="medicationCode" class="form-label">
+                            Medication Code
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="medicationCode"
+                               placeholder="Enter medication code"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="medicationDosage" class="form-label">
+                            Dosage
+                        </label>
+                        <input type="text"
+                               class="form-control"
+                               id="medicationDosage"
+                               placeholder="e.g. 500 mg twice daily"
+                               required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="medicationRoute" class="form-label">
+                            Route of Administration
+                        </label>
+                        <select class="form-select" id="medicationRoute">
+                            <option value="">Select route</option>
+                            <option value="Oral">Oral</option>
+                            <option value="Intravenous">Intravenous</option>
+                            <option value="Intramuscular">Intramuscular</option>
+                            <option value="Subcutaneous">Subcutaneous</option>
+                            <option value="Topical">Topical</option>
+                            <option value="Inhalation">Inhalation</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="medicationStartDate" class="form-label">
+                            Start Date
+                        </label>
+                        <input type="date"
+                               class="form-control"
+                               id="medicationStartDate" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="medicationEndDate" class="form-label">
+                            End Date
+                        </label>
+                        <input type="date"
+                               class="form-control"
+                               id="medicationEndDate" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="medicationEncounterId" class="form-label">
+                            Related Clinical Encounter
+                        </label>
+                        <select class="form-select" id="medicationEncounterId">
+                            <option value="">No related encounter</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="medicationStatus" class="form-label">
+                            Medication Status
+                        </label>
+                        <select class="form-select" id="medicationStatus" required>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="stopped">Stopped</option>
+                            <option value="on-hold">On Hold</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary mt-4"
+                        id="saveMedicationButton">
+                    Save Medication
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- MEDICATION HISTORY -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="fw-bold">Medication History</h5>
+                    <p class="text-muted small mb-0">
+                        Prescribed medications and dosage information.
+                    </p>
+                </div>
+                <span class="badge bg-success" id="medicationCount">0</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Medication</th>
+                            <th>Code</th>
+                            <th>Dosage</th>
+                            <th>Route</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="medications">
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">
+                                Loading medication records...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+
+<script>
+
+    const patientId = "@Model.PatientId";
+    const token = localStorage.getItem("hospitalRepositoryToken");
+
+    const headers = {
+        "Authorization": "Bearer " + token
+    };
+
+    function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, c => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        })[c]);
+    }
+
+    function formatDate(value) {
+        if (!value) return "Not recorded";
+
+        const date = new Date(value);
+
+        if (isNaN(date.getTime())) return escapeHtml(value);
+
+        return date.toLocaleDateString();
+    }
+
+    function formatNumber(value) {
+        if (value === null || value === undefined) {
+            return "Not available";
+        }
+
+        return Number(value).toLocaleString(undefined, {
+            maximumFractionDigits: 4
+        });
+    }
+
+    function showMessage(message, type = "danger") {
+        const box = document.getElementById("message");
+        box.textContent = message;
+        box.className = "alert alert-" + type;
+        box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    async function api(url) {
+
+        const response = await fetch(url, {
+            headers: headers
+        });
+
+        if (response.status === 401) {
+            localStorage.clear();
+            window.location.href = "/Account/Login";
+            throw new Error("Your session has expired.");
+        }
+
+        if (response.status === 403) {
+            throw new Error("You are not authorized to access this information.");
+        }
+
+        if (!response.ok) {
+            throw new Error("Unable to load information from " + url);
+        }
+
+        return await response.json();
+    }
+
+    // PATIENT INFORMATION
+    async function loadPatient() {
+
+        const patient = await api(
+            `/api/patients/${encodeURIComponent(patientId)}`
+        );
+
+        document.getElementById("patientDetails").innerHTML = `
+
+            <div class="d-flex justify-content-between flex-wrap gap-3 mb-4">
+                <div>
+                    <h3 class="fw-bold mb-2">
+                        ${escapeHtml(patient.givenName)}
+                        ${escapeHtml(patient.familyName)}
+                    </h3>
+
+                    <span class="badge bg-primary">
+                        ${escapeHtml(patient.masterPatientId)}
+                    </span>
+                </div>
+
+                <div class="text-md-end">
+                    <small class="text-muted">Managing Institution</small>
+                    <div class="fw-semibold">
+                        ${escapeHtml(patient.managingInstitutionName || "Not specified")}
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <h5 class="fw-bold mb-3">Personal Information</h5>
+
+            <div class="row g-4">
+
+                <div class="col-md-4">
+                    <small class="text-muted">Medical Record Number</small>
+                    <div class="fw-semibold">
+                        ${escapeHtml(patient.medicalRecordNumber)}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Date of Birth</small>
+                    <div class="fw-semibold">
+                        ${escapeHtml(patient.dateOfBirth)}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Sex</small>
+                    <div class="fw-semibold">
+                        ${escapeHtml(patient.sex)}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Phone</small>
+                    <div class="fw-semibold">
+                        ${escapeHtml(patient.phone || "Not provided")}
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">National Identifier</small>
+                    <div class="fw-semibold">
+                        ${escapeHtml(patient.nationalIdentifier || "Not provided")}
+                    </div>
+                </div>
+
+            </div>
+
+            <hr />
+
+            <h5 class="fw-bold mb-3">Additional Identifiers</h5>
+
+            ${
+                patient.identifiers?.length
+                ? patient.identifiers.map(item => `
+                    <div class="border rounded p-3 mb-2">
+                        <strong>${escapeHtml(item.system)}</strong>
+                        <div>${escapeHtml(item.value)}</div>
+                        <small class="text-muted">
+                            ${escapeHtml(item.type || "")}
+                        </small>
+                    </div>
+                `).join("")
+                : "<p class='text-muted'>No additional identifiers recorded.</p>"
+            }
+
+        `;
+
+    }
+
+    // INSTITUTIONS
+    async function loadInstitutions() {
+
+        const select = document.getElementById("encounterInstitutionId");
+
+        try {
+
+            const institutions = await api("/api/institutions");
+
+            select.innerHTML = `
+                <option value="">Select institution</option>
+                ${institutions.map(institution => `
+                    <option value="${escapeHtml(institution.id)}">
+                        ${escapeHtml(institution.name)}
+                    </option>
+                `).join("")}
+            `;
+
+            if (!institutions.length) {
+                select.innerHTML = `
+                    <option value="">No institutions available</option>
+                `;
+            }
+
+        }
+        catch (error) {
+
+            select.innerHTML = `
+                <option value="">Unable to load institutions</option>
+            `;
+
+            console.error(error);
+
+        }
+
+    }
+
+    function setCurrentDateTime(elementId) {
+
+        const now = new Date();
+
+        now.setMinutes(
+            now.getMinutes() - now.getTimezoneOffset()
+        );
+
+        document.getElementById(elementId).value =
+            now.toISOString().slice(0, 16);
+
+    }
+
+    // SAVE PATIENT VISIT
+    async function saveEncounter(event) {
+
+        event.preventDefault();
+
+        const button = document.getElementById("saveEncounterButton");
+
+        const institutionId =
+            document.getElementById("encounterInstitutionId").value;
+
+        const startValue =
+            document.getElementById("encounterStartUtc").value;
+
+        const reason =
+            document.getElementById("encounterReason").value.trim();
+
+        const diagnosis =
+            document.getElementById("encounterDiagnosis").value.trim();
+
+        const procedure =
+            document.getElementById("encounterProcedure").value.trim();
+
+        if (!institutionId || !startValue || !reason) {
+            showMessage("Please complete all required visit fields.");
+            return;
+        }
+
+        const request = {
+            patientId: patientId,
+            institutionId: institutionId,
+            providerId: null,
+            startUtc: new Date(startValue).toISOString(),
+            reason: reason,
+            diagnosis: diagnosis || null,
+            procedure: procedure || null
+        };
+
+        try {
+
+            button.disabled = true;
+            button.textContent = "Saving...";
+
+            const response = await fetch("/api/encounters", {
+                method: "POST",
+                headers: {
+                    ...headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(request)
+            });
+
+            if (response.status === 401) {
+                localStorage.clear();
+                window.location.href = "/Account/Login";
+                return;
+            }
+
+            if (response.status === 403) {
+                throw new Error("You are not authorized to record clinical encounters.");
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Unable to save the clinical encounter.");
+            }
+
+            showMessage("Patient visit recorded successfully!", "success");
+
+            document.getElementById("encounterForm").reset();
+
+            setCurrentDateTime("encounterStartUtc");
+
+            await loadEncounters();
+
+        }
+        catch (error) {
+            showMessage(error.message);
+        }
+        finally {
+            button.disabled = false;
+            button.textContent = "Save Patient Visit";
+        }
+
+    }
+
+    document.getElementById("encounterForm")
+        .addEventListener("submit", saveEncounter);
+
+    // LOAD CLINICAL ENCOUNTERS
+    async function loadEncounters() {
+
+        const rows = document.getElementById("encounters");
+
+        try {
+
+            const data = await api(
+                `/api/encounters?patientId=${encodeURIComponent(patientId)}`
+            );
+
+            document.getElementById("encounterCount").textContent = data.length;
+
+            const labSelect = document.getElementById("labEncounterId");
+            const medicationSelect = document.getElementById("medicationEncounterId");
+
+            const options = data.map(item => `
+                <option value="${escapeHtml(item.id)}">
+                    ${escapeHtml(formatDate(item.startUtc))}
+                    - ${escapeHtml(item.reason)}
+                </option>
+            `).join("");
+
+            labSelect.innerHTML =
+                '<option value="">No related encounter</option>' + options;
+
+            medicationSelect.innerHTML =
+                '<option value="">No related encounter</option>' + options;
+
+            if (!data.length) {
+                rows.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            No clinical encounters recorded for this patient.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            rows.innerHTML = data.map(item => `
+                <tr>
+                    <td>${formatDate(item.startUtc)}</td>
+                    <td>${escapeHtml(item.institutionName)}</td>
+                    <td>${escapeHtml(item.reason)}</td>
+                    <td>${escapeHtml(item.diagnosis || "Not recorded")}</td>
+                    <td>${escapeHtml(item.procedure || "Not recorded")}</td>
+                    <td>${escapeHtml(item.status)}</td>
+                </tr>
+            `).join("");
+
+        }
+        catch (error) {
+
+            rows.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-danger">
+                        ${escapeHtml(error.message)}
+                    </td>
+                </tr>
+            `;
+
+        }
+
+    }
+
+    // SAVE LABORATORY RESULT
+    async function saveLaboratoryResult(event) {
+
+        event.preventDefault();
+
+        const button = document.getElementById("saveLaboratoryButton");
+
+        const display = document.getElementById("labDisplay").value.trim();
+        const code = document.getElementById("labCode").value.trim();
+        const numericInput = document.getElementById("labNumericValue").value.trim();
+        const textValue = document.getElementById("labTextValue").value.trim();
+        const unit = document.getElementById("labUnit").value.trim();
+        const effectiveValue = document.getElementById("labEffectiveUtc").value;
+        const encounterId = document.getElementById("labEncounterId").value;
+        const status = document.getElementById("labStatus").value;
+
+        if (!display || !code || !effectiveValue) {
+            showMessage("Please enter the test name, code and test date.");
+            return;
+        }
+
+        if (numericInput && textValue) {
+            showMessage("Enter either a numeric result or a text result, not both.");
+            return;
+        }
+
+        if (!numericInput && !textValue) {
+            showMessage("Please enter a numeric result or a text result.");
+            return;
+        }
+
+        const numericValue = numericInput ? Number(numericInput) : null;
+
+        if (numericInput && !Number.isFinite(numericValue)) {
+            showMessage("Please enter a valid numeric result.");
+            return;
+        }
+
+        const request = {
+            patientId: patientId,
+            encounterId: encounterId || null,
+            code: code,
+            display: display,
+            numericValue: numericValue,
+            textValue: textValue || null,
+            unit: unit || null,
+            effectiveUtc: new Date(effectiveValue).toISOString(),
+            status: status
+        };
+
+        try {
+
+            button.disabled = true;
+            button.textContent = "Saving...";
+
+            const response = await fetch("/api/laboratory-results", {
+                method: "POST",
+                headers: {
+                    ...headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(request)
+            });
+
+            if (response.status === 401) {
+                localStorage.clear();
+                window.location.href = "/Account/Login";
+                return;
+            }
+
+            if (response.status === 403) {
+                throw new Error("You are not authorized to record laboratory results.");
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Unable to save the laboratory result.");
+            }
+
+            showMessage("Laboratory result recorded successfully!", "success");
+
+            document.getElementById("laboratoryForm").reset();
+
+            setCurrentDateTime("labEffectiveUtc");
+
+            await loadLaboratoryResults();
+
+            // Refresh analysis after a new laboratory result is saved.
+            await loadClinicalAnalysis();
+
+        }
+        catch (error) {
+            showMessage(error.message);
+        }
+        finally {
+            button.disabled = false;
+            button.textContent = "Save Laboratory Result";
+        }
+
+    }
+
+    document.getElementById("laboratoryForm")
+        .addEventListener("submit", saveLaboratoryResult);
+
+    // LOAD LABORATORY RESULTS
+    async function loadLaboratoryResults() {
+
+        const rows = document.getElementById("laboratoryResults");
+
+        try {
+
+            const data = await api(
+                `/api/laboratory-results?patientId=${encodeURIComponent(patientId)}`
+            );
+
+            document.getElementById("labCount").textContent = data.length;
+
+            if (!data.length) {
+                rows.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            No laboratory results recorded.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            rows.innerHTML = data.map(item => `
+                <tr>
+                    <td>${escapeHtml(item.display)}</td>
+                    <td>${escapeHtml(item.code)}</td>
+                    <td>${escapeHtml(item.numericValue ?? item.textValue ?? "No result")}</td>
+                    <td>${escapeHtml(item.unit || "-")}</td>
+                    <td>${formatDate(item.effectiveUtc)}</td>
+                    <td>${escapeHtml(item.status)}</td>
+                </tr>
+            `).join("");
+
+        }
+        catch (error) {
+
+            rows.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-danger">
+                        ${escapeHtml(error.message)}
+                    </td>
+                </tr>
+            `;
+
+        }
+
+    }
+
+    // NEW: LOAD CLINICAL ANALYSIS
+    async function loadClinicalAnalysis() {
+
+        const loading = document.getElementById("analysisLoading");
+        const analysis = document.getElementById("clinicalAnalysis");
+        const errorBox = document.getElementById("analysisError");
+        const refreshButton = document.getElementById("refreshAnalysisButton");
+
+        loading.classList.remove("d-none");
+        analysis.classList.add("d-none");
+        errorBox.classList.add("d-none");
+
+        refreshButton.disabled = true;
+        refreshButton.textContent = "Analysing...";
+
+        try {
+
+            const data = await api(
+                `/api/patients/${encodeURIComponent(patientId)}/clinical-analysis`
+            );
+
+            // SUMMARY
+            document.getElementById("analysisTotalResults").textContent =
+                data.totalResults ?? 0;
+
+            document.getElementById("analysisDistinctTests").textContent =
+                data.distinctTests ?? 0;
+
+            document.getElementById("analysisRepeatedTests").textContent =
+                data.repeatedTests ?? 0;
+
+            document.getElementById("analysisLatestResult").textContent =
+                formatDate(data.latestResultUtc);
+
+            // TEST TRENDS
+            const trendsContainer =
+                document.getElementById("analysisTrends");
+
+            const trends = data.trends || [];
+
+            if (!trends.length) {
+
+                trendsContainer.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-3">
+                            No laboratory trends can be generated yet.
+                            Record laboratory results to begin analysis.
+                        </td>
+                    </tr>
+                `;
+
+            }
+            else {
+
+                trendsContainer.innerHTML = trends.map(item => {
+
+                    let trendBadge = "bg-secondary";
+
+                    if (item.trend === "Increasing") {
+                        trendBadge = "bg-primary";
+                    }
+                    else if (item.trend === "Decreasing") {
+                        trendBadge = "bg-warning text-dark";
+                    }
+                    else if (item.trend === "No numerical change") {
+                        trendBadge = "bg-success";
+                    }
+
+                    return `
+                        <tr>
+                            <td>
+                                <strong>${escapeHtml(item.display || item.code)}</strong>
+                                <div class="small text-muted">
+                                    ${escapeHtml(item.code)}
+                                </div>
+                            </td>
+
+                            <td>${escapeHtml(item.resultCount)}</td>
+
+                            <td>
+                                ${escapeHtml(formatNumber(item.earliestNumericValue))}
+                                ${escapeHtml(item.unit || "")}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(formatNumber(item.latestNumericValue))}
+                                ${escapeHtml(item.unit || "")}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(formatNumber(item.numericChange))}
+                                ${escapeHtml(item.unit || "")}
+                            </td>
+
+                            <td>
+                                <span class="badge ${trendBadge}">
+                                    ${escapeHtml(item.trend)}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+
+                }).join("");
+
+            }
+
+            // GENERATED OBSERVATIONS
+            const observationsContainer =
+                document.getElementById("analysisObservations");
+
+            const observations = data.observations || [];
+
+            if (!observations.length) {
+
+                observationsContainer.innerHTML = `
+                    <p class="text-muted">
+                        No observations are currently available.
+                    </p>
+                `;
+
+            }
+            else {
+
+                observationsContainer.innerHTML = observations.map(item => {
+
+                    let levelClass = "border-secondary";
+
+                    if (
+                        String(item.level || "").toLowerCase() === "warning"
+                    ) {
+                        levelClass = "border-warning";
+                    }
+                    else if (
+                        String(item.level || "").toLowerCase() === "critical"
+                    ) {
+                        levelClass = "border-danger";
+                    }
+                    else if (
+                        String(item.level || "").toLowerCase() === "info"
+                    ) {
+                        levelClass = "border-info";
+                    }
+
+                    return `
+                        <div class="border-start border-4 ${levelClass} rounded p-3 mb-3 bg-light">
+
+                            <div class="d-flex justify-content-between flex-wrap gap-2">
+
+                                <strong>
+                                    ${escapeHtml(item.title)}
+                                </strong>
+
+                                <small class="text-muted">
+                                    ${escapeHtml(formatDate(item.observedAtUtc))}
+                                </small>
+
+                            </div>
+
+                            <p class="mb-0 mt-2">
+                                ${escapeHtml(item.description)}
+                            </p>
+
+                        </div>
+                    `;
+
+                }).join("");
+
+            }
+
+            // DISCLAIMER
+            document.getElementById("analysisDisclaimer").textContent =
+                data.clinicalDisclaimer ||
+                "This analysis summarises recorded laboratory data and does not replace professional clinical interpretation.";
+
+            loading.classList.add("d-none");
+            analysis.classList.remove("d-none");
+
+        }
+        catch (error) {
+
+            loading.classList.add("d-none");
+            analysis.classList.add("d-none");
+
+            errorBox.textContent =
+                "Unable to generate clinical analysis: " + error.message;
+
+            errorBox.classList.remove("d-none");
+
+            console.error("Clinical analysis error:", error);
+
+        }
+        finally {
+
+            refreshButton.disabled = false;
+            refreshButton.innerHTML =
+                '<i class="bi bi-arrow-clockwise"></i> Refresh Analysis';
+
+        }
+
+    }
+
+    // MANUAL ANALYSIS REFRESH
+    document.getElementById("refreshAnalysisButton")
+        .addEventListener("click", loadClinicalAnalysis);
+
+    // SAVE MEDICATION
+    async function saveMedication(event) {
+
+        event.preventDefault();
+
+        const button = document.getElementById("saveMedicationButton");
+
+        const medicationName =
+            document.getElementById("medicationName").value.trim();
+
+        const medicationCode =
+            document.getElementById("medicationCode").value.trim();
+
+        const dosage =
+            document.getElementById("medicationDosage").value.trim();
+
+        const route =
+            document.getElementById("medicationRoute").value;
+
+        const startDate =
+            document.getElementById("medicationStartDate").value;
+
+        const endDate =
+            document.getElementById("medicationEndDate").value;
+
+        const encounterId =
+            document.getElementById("medicationEncounterId").value;
+
+        const status =
+            document.getElementById("medicationStatus").value;
+
+        if (!medicationName || !medicationCode || !dosage) {
+            showMessage("Please enter the medication name, code and dosage.");
+            return;
+        }
+
+        if (startDate && endDate && endDate < startDate) {
+            showMessage("The medication end date cannot be before the start date.");
+            return;
+        }
+
+        const request = {
+            patientId: patientId,
+            encounterId: encounterId || null,
+            medicationCode: medicationCode,
+            medicationName: medicationName,
+            dosage: dosage,
+            route: route || null,
+            startDate: startDate || null,
+            endDate: endDate || null,
+            status: status
+        };
+
+        try {
+
+            button.disabled = true;
+            button.textContent = "Saving...";
+
+            const response = await fetch("/api/medications", {
+                method: "POST",
+                headers: {
+                    ...headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(request)
+            });
+
+            if (response.status === 401) {
+                localStorage.clear();
+                window.location.href = "/Account/Login";
+                return;
+            }
+
+            if (response.status === 403) {
+                throw new Error("You are not authorized to record medications.");
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Unable to save the medication.");
+            }
+
+            showMessage("Medication recorded successfully!", "success");
+
+            document.getElementById("medicationForm").reset();
+
+            await loadMedications();
+
+        }
+        catch (error) {
+            showMessage(error.message);
+        }
+        finally {
+            button.disabled = false;
+            button.textContent = "Save Medication";
+        }
+
+    }
+
+    document.getElementById("medicationForm")
+        .addEventListener("submit", saveMedication);
+
+    // LOAD MEDICATION HISTORY
+    async function loadMedications() {
+
+        const rows = document.getElementById("medications");
+
+        try {
+
+            const data = await api(
+                `/api/medications?patientId=${encodeURIComponent(patientId)}`
+            );
+
+            document.getElementById("medicationCount").textContent = data.length;
+
+            if (!data.length) {
+                rows.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            No medication records found.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            rows.innerHTML = data.map(item => `
+                <tr>
+                    <td>${escapeHtml(item.medicationName)}</td>
+                    <td>${escapeHtml(item.medicationCode)}</td>
+                    <td>${escapeHtml(item.dosage)}</td>
+                    <td>${escapeHtml(item.route || "-")}</td>
+                    <td>${formatDate(item.startDate)}</td>
+                    <td>${formatDate(item.endDate)}</td>
+                    <td>${escapeHtml(item.status)}</td>
+                </tr>
+            `).join("");
+
+        }
+        catch (error) {
+
+            rows.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-danger">
+                        ${escapeHtml(error.message)}
+                    </td>
+                </tr>
+            `;
+
+        }
+
+    }
+
+    // INITIALIZE PAGE
+    async function initializePage() {
+
+        if (!token) {
+            window.location.href = "/Account/Login";
+            return;
+        }
+
+        try {
+
+            await loadPatient();
+            await loadInstitutions();
+
+            setCurrentDateTime("encounterStartUtc");
+            setCurrentDateTime("labEffectiveUtc");
+
+        }
+        catch (error) {
+
+            showMessage(error.message);
+            return;
+
+        }
+
+        await Promise.all([
+            loadEncounters(),
+            loadLaboratoryResults(),
+            loadMedications(),
+            loadClinicalAnalysis()
+        ]);
+
+    }
+
+    initializePage();
+
+</script>
+
+}

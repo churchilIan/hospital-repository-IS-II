@@ -1,0 +1,289 @@
+
+@page
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="landing-hero">
+    <div class="hero-content">
+        <div class="hero-label">
+            <span class="hero-label-dot"></span>
+            NATIONAL DIGITAL HEALTH INFRASTRUCTURE
+        </div>
+
+        <h1>
+            Connecting healthcare.
+            <span>Unifying patient information.</span>
+        </h1>
+
+        <p class="hero-description">
+            The National Hospital Repository provides a secure platform for
+            connecting healthcare institutions, linking patient identities
+            and supporting the exchange of clinical information across hospitals.
+        </p>
+
+        <div class="hero-actions">
+            <a href="/Account/Login" class="btn btn-hero-primary">
+                Access the Repository <span>→</span>
+            </a>
+            <a href="#services" class="btn btn-hero-secondary">
+                Explore Services
+            </a>
+        </div>
+
+        <div class="hero-note">
+            <span class="hero-note-icon">✓</span>
+            Secure, interoperable and institution-connected health information
+        </div>
+    </div>
+
+    <div class="hero-visual">
+        <div class="network-card">
+            <div class="network-heading">
+                <div>
+                    <span class="network-kicker">CONNECTED CARE</span>
+                    <h3>One connected system</h3>
+                </div>
+                <span class="network-status">● Connected</span>
+            </div>
+
+            <div class="network-diagram" role="img" aria-label="Hospital A, Hospital B and Hospital C connected to the National Repository">
+                <svg class="network-connectors" viewBox="0 0 1000 288" preserveAspectRatio="none" aria-hidden="true">
+                    <!-- Lines stop at the outside edges of the cards, not through their contents. -->
+                    <line class="connector-left" x1="20.8%" y1="14.93%" x2="41.7%" y2="31.25%"></line>
+                    <line class="connector-right" x1="79.2%" y1="14.93%" x2="58.3%" y2="31.25%"></line>
+                    <line class="connector-bottom" x1="50%" y1="68.75%" x2="50%" y2="72.22%"></line>
+                </svg>
+
+                <div class="network-node hospital-node node-one">
+                    <span>+</span>
+                    <small>Hospital A</small>
+                </div>
+
+                <div class="network-node hospital-node node-two">
+                    <span>+</span>
+                    <small>Hospital B</small>
+                </div>
+
+                <div class="network-node central-node">
+                    <span class="central-symbol">✚</span>
+                    <strong>National</strong>
+                    <small>Repository</small>
+                </div>
+
+                <div class="network-node hospital-node node-three">
+                    <span>+</span>
+                    <small>Hospital C</small>
+                </div>
+            </div>
+
+            <div class="network-footer">
+                <div>
+                    <span class="network-footer-icon">◎</span>
+                    <span>Shared patient identity</span>
+                </div>
+                <div>
+                    <span class="network-footer-icon">↔</span>
+                    <span>Interoperable records</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-floating-card">
+            <span class="floating-check">✓</span>
+            <div>
+                <strong>Connected healthcare</strong>
+                <small>Information exchange across institutions</small>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="trust-strip">
+    <div>
+        <span class="trust-symbol">01</span>
+        <span>Unified patient identity</span>
+    </div>
+    <div>
+        <span class="trust-symbol">02</span>
+        <span>Interoperable health records</span>
+    </div>
+    <div>
+        <span class="trust-symbol">03</span>
+        <span>National health surveillance</span>
+    </div>
+</section>
+
+<section id="about" class="content-section">
+    <div class="section-heading">
+        <span class="section-kicker">ABOUT THE PLATFORM</span>
+        <h2>A connected approach to healthcare information</h2>
+        <p>
+            The National Hospital Repository is designed to support the secure
+            sharing and coordination of health information across participating
+            healthcare institutions.
+        </p>
+    </div>
+
+    <div class="about-grid">
+        <div class="about-main-card">
+            <div class="about-icon">✚</div>
+            <h3>One patient identity. Multiple healthcare institutions.</h3>
+            <p>
+                Patients may receive care from different hospitals. The Master
+                Patient Index helps identify records belonging to the same
+                individual while allowing each institution to retain its own
+                local medical record identifiers.
+            </p>
+            <a href="/Account/Login" class="text-link">
+                Explore the repository <span>→</span>
+            </a>
+        </div>
+
+        <div class="about-side-card">
+            <div class="about-stat">
+                <span class="about-stat-number">MPI</span>
+                <strong>Master Patient Index</strong>
+                <p>A shared identity reference across participating institutions.</p>
+            </div>
+            <div class="about-stat">
+                <span class="about-stat-number">FHIR</span>
+                <strong>Health data interoperability</strong>
+                <p>Structured exchange of healthcare information using FHIR standards.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="services" class="content-section services-section">
+    <div class="section-heading">
+        <span class="section-kicker">PLATFORM CAPABILITIES</span>
+        <h2>Services within the repository</h2>
+        <p>
+            Different modules work together to support patient identification,
+            clinical information exchange and health system oversight.
+        </p>
+    </div>
+
+    <div class="services-grid">
+        <article class="service-card">
+            <div class="service-icon service-blue">01</div>
+            <h3>Master Patient Index</h3>
+            <p>
+                Identify and link patient records across participating hospitals
+                through a shared patient identity.
+            </p>
+            <a href="/Patients" class="text-link">Patient registry <span>→</span></a>
+        </article>
+
+        <article class="service-card">
+            <div class="service-icon service-teal">02</div>
+            <h3>Clinical Records</h3>
+            <p>
+                Support the recording and retrieval of clinical encounters,
+                diagnoses and treatment information.
+            </p>
+            <a href="/Account/Login" class="text-link">Staff access <span>→</span></a>
+        </article>
+
+        <article class="service-card">
+            <div class="service-icon service-purple">03</div>
+            <h3>Laboratory Information</h3>
+            <p>
+                Support the management and sharing of laboratory results
+                associated with patient records.
+            </p>
+            <a href="/Account/Login" class="text-link">Staff access <span>→</span></a>
+        </article>
+
+        <article class="service-card">
+            <div class="service-icon service-orange">04</div>
+            <h3>Health Surveillance</h3>
+            <p>
+                Provide authorised users with disease trends, institutional
+                reporting and national health statistics.
+            </p>
+            <a href="/Account/Login" class="text-link">Authorised access <span>→</span></a>
+        </article>
+
+        <article class="service-card">
+            <div class="service-icon service-green">05</div>
+            <h3>FHIR Interoperability</h3>
+            <p>
+                Support structured healthcare information exchange through
+                HL7 FHIR R4 resources and APIs.
+            </p>
+            <a href="/Account/Login" class="text-link">System access <span>→</span></a>
+        </article>
+
+        <article class="service-card">
+            <div class="service-icon service-red">06</div>
+            <h3>Audit and Reporting</h3>
+            <p>
+                Support accountability through system activity records,
+                reporting and authorised oversight.
+            </p>
+            <a href="/Account/Login" class="text-link">Authorised access <span>→</span></a>
+        </article>
+    </div>
+</section>
+
+<section class="process-section">
+    <div class="section-heading">
+        <span class="section-kicker">HOW IT WORKS</span>
+        <h2>From individual hospitals to connected healthcare</h2>
+        <p>
+            The repository supports information exchange while maintaining
+            the identity and institutional context of each healthcare record.
+        </p>
+    </div>
+
+    <div class="process-grid">
+        <div class="process-step">
+            <span class="process-number">01</span>
+            <h3>Hospital registration</h3>
+            <p>Participating healthcare institutions are registered within the repository.</p>
+        </div>
+
+        <div class="process-step">
+            <span class="process-number">02</span>
+            <h3>Patient identification</h3>
+            <p>Patient records are linked through the Master Patient Index.</p>
+        </div>
+
+        <div class="process-step">
+            <span class="process-number">03</span>
+            <h3>Information exchange</h3>
+            <p>Authorised systems can exchange relevant clinical information.</p>
+        </div>
+
+        <div class="process-step">
+            <span class="process-number">04</span>
+            <h3>Health system insights</h3>
+            <p>Aggregated information supports reporting and surveillance.</p>
+        </div>
+    </div>
+</section>
+
+<section class="access-banner">
+    <div>
+        <span class="section-kicker">ACCESS THE PLATFORM</span>
+        <h2>One connected repository for better-informed healthcare.</h2>
+        <p>
+            Sign in to access the services and information available to your
+            authorised user account.
+        </p>
+    </div>
+    <a href="/Account/Login" class="btn btn-access">
+        Sign in to continue <span>→</span>
+    </a>
+</section>
+
+<section class="disclaimer-section">
+    <strong>Demonstration environment</strong>
+    <p>
+        This platform is an academic demonstration. Use synthetic patient data.
+        Production deployment requires appropriate security, privacy,
+        consent, encryption, governance and regulatory compliance controls.
+    </p>
+</section>

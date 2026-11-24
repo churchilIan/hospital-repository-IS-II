@@ -1,0 +1,275 @@
+﻿
+@page
+@model HospitalRepository.Web.Pages.Clinical.DashboardModel
+
+@{
+    ViewData["Title"] = "Clinical Dashboard";
+}
+
+<div class="container-fluid mt-4 px-3 px-lg-4">
+
+    <!-- Welcome section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+        <div>
+            <p class="text-uppercase text-muted small mb-1">
+                National Hospital Repository / Clinical Workspace
+            </p>
+            <h2 class="fw-bold mb-1">Clinical Dashboard</h2>
+            <p class="text-muted mb-0">
+                Welcome back, @Model.StaffName.
+            </p>
+        </div>
+
+        <div class="mt-3 mt-md-0">
+            <span class="badge bg-primary fs-6 px-3 py-2">
+                @Model.StaffRole
+            </span>
+        </div>
+    </div>
+
+    <!-- Information banner -->
+    <div class="alert alert-info border-0 shadow-sm">
+        <div class="d-flex align-items-center">
+            <div class="me-3">
+                <i class="bi bi-hospital fs-3"></i>
+            </div>
+            <div>
+                <strong>Clinical Workspace</strong>
+                <p class="mb-0">
+                    Search patient records and access authorized clinical information
+                    across the National Hospital Repository.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main workspace -->
+    <h5 class="fw-bold mb-3">Clinical Operations</h5>
+
+    <div class="row g-4">
+
+        <!-- Patient search -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="mb-3 text-primary">
+                        <i class="bi bi-search fs-1"></i>
+                    </div>
+
+                    <h5 class="fw-bold">Patient Records</h5>
+
+                    <p class="text-muted">
+                        Search the national patient repository using a patient's
+                        name, Medical Record Number or Master Patient ID.
+                    </p>
+
+                    <a asp-page="/Patients/Dashboard"
+                       class="btn btn-primary">
+                        Search Patients
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Encounters -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="mb-3 text-success">
+                        <i class="bi bi-clipboard2-pulse fs-1"></i>
+                    </div>
+
+                    <h5 class="fw-bold">Clinical Encounters</h5>
+
+                    <p class="text-muted">
+                        Record and review patient visits, diagnoses,
+                        procedures and treatment information.
+                    </p>
+
+                    <a href="#clinical-workflow"
+                       class="btn btn-outline-success">
+                        View Clinical Services
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Laboratory -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-eyedropper fs-1"></i>
+                    </div>
+
+                    <h5 class="fw-bold">Laboratory Results</h5>
+
+                    <p class="text-muted">
+                        Access laboratory investigations and record
+                        results for authorized patients.
+                    </p>
+
+                    <a href="#clinical-workflow"
+                       class="btn btn-outline-warning">
+                        View Clinical Services
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medications -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="mb-3 text-danger">
+                        <i class="bi bi-capsule fs-1"></i>
+                    </div>
+
+                    <h5 class="fw-bold">Medication Records</h5>
+
+                    <p class="text-muted">
+                        Review medication history and record prescribed
+                        medications according to your role.
+                    </p>
+
+                    <a href="#clinical-workflow"
+                       class="btn btn-outline-danger">
+                        View Clinical Services
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient registration -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="mb-3 text-info">
+                        <i class="bi bi-person-plus fs-1"></i>
+                    </div>
+
+                    <h5 class="fw-bold">Patient Registration</h5>
+
+                    <p class="text-muted">
+                        Register a patient and associate their record
+                        with the managing healthcare institution.
+                    </p>
+
+                    <a asp-page="/Patients/Dashboard"
+                       class="btn btn-outline-info">
+                        Open Patient Registration
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account -->
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="mb-3 text-secondary">
+                        <i class="bi bi-person-badge fs-1"></i>
+                    </div>
+
+                    <h5 class="fw-bold">Staff Account</h5>
+
+                    <p class="text-muted">
+                        View your account information and the institution
+                        associated with your staff account.
+                    </p>
+
+                    <a href="#account-information"
+                       class="btn btn-outline-secondary">
+                        View Account
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Clinical workflow information -->
+    <div class="card shadow-sm border-0 mt-4" id="clinical-workflow">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">Clinical Workflow</h5>
+
+            <p class="text-muted">
+                The clinical workspace brings together the following
+                patient-care activities:
+            </p>
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded h-100">
+                        <h6 class="fw-bold">01. Patient Identification</h6>
+                        <p class="small text-muted mb-0">
+                            Find the correct patient using their central
+                            identity and hospital identifiers.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded h-100">
+                        <h6 class="fw-bold">02. Clinical History</h6>
+                        <p class="small text-muted mb-0">
+                            Review permitted encounters, diagnoses,
+                            laboratory results and medications.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 bg-light rounded h-100">
+                        <h6 class="fw-bold">03. Clinical Documentation</h6>
+                        <p class="small text-muted mb-0">
+                            Record new clinical information based on
+                            your assigned staff permissions.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Account information -->
+    <div class="card shadow-sm border-0 mt-4 mb-4" id="account-information">
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-3">Account Information</h5>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <small class="text-muted">Staff Name</small>
+                    <p class="fw-semibold mb-0">@Model.StaffName</p>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Staff Role</small>
+                    <p class="fw-semibold mb-0">@Model.StaffRole</p>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted">Institution ID</small>
+                    <p class="fw-semibold mb-0">
+                        @(Model.InstitutionId?.ToString() ?? "Not assigned")
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Logout -->
+    <div class="d-flex justify-content-end mb-4">
+        <a asp-page="/Account/Logout"
+           class="btn btn-danger">
+            <i class="bi bi-box-arrow-right me-2"></i>
+            Logout
+        </a>
+    </div>
+
+</div>

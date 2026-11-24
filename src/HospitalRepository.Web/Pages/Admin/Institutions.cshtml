@@ -1,0 +1,146 @@
+﻿@page
+@model HospitalRepository.Web.Pages.Admin.InstitutionsModel
+
+@{
+    ViewData["Title"] = "Manage Hospitals";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Hospital Management</h2>
+            <p class="text-muted">Register and manage hospitals connected to the National Hospital Repository.</p>
+        </div>
+        <a asp-page="/Admin/Dashboard" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card shadow-sm border-0"><div class="card-body"><div class="text-muted">Total Hospitals</div><h3 class="fw-bold">@Model.Institutions.Count</h3></div></div></div>
+        <div class="col-md-4"><div class="card shadow-sm border-0"><div class="card-body"><div class="text-muted">Active Hospitals</div><h3 class="fw-bold text-success">@Model.Institutions.Count(x => x.IsActive)</h3></div></div></div>
+        <div class="col-md-4"><div class="card shadow-sm border-0"><div class="card-body"><div class="text-muted">Inactive Hospitals</div><h3 class="fw-bold text-danger">@Model.Institutions.Count(x => !x.IsActive)</h3></div></div></div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3"><h5 class="mb-0 fw-bold">Register New Hospital</h5></div>
+        <div class="card-body">
+            <form method="post" asp-page-handler="Create">
+                <div class="row g-3">
+                    <div class="col-md-4"><label asp-for="Input.Name" class="form-label">Hospital Name</label><input asp-for="Input.Name" class="form-control" placeholder="e.g. Nairobi General Hospital" required /></div>
+                    <div class="col-md-4"><label asp-for="Input.Code" class="form-label">Hospital Code</label><input asp-for="Input.Code" class="form-control" placeholder="e.g. NGH-001" required /></div>
+                    <div class="col-md-4"><label asp-for="Input.Address" class="form-label">Hospital Address</label><input asp-for="Input.Address" class="form-control" placeholder="Enter hospital address" /></div>
+                    <div class="col-md-6"><label asp-for="Input.County" class="form-label">County</label><input asp-for="Input.County" class="form-control" placeholder="e.g. Nairobi" required /></div>
+                    <div class="col-md-6"><label asp-for="Input.SubCounty" class="form-label">Sub-County</label><input asp-for="Input.SubCounty" class="form-control" placeholder="e.g. Westlands" required /></div>
+
+                    <div class="col-12"><hr class="my-2" /><h6 class="fw-bold mb-1">Map Coordinates <span class="text-muted fw-normal">(Optional)</span></h6><small class="text-muted">Leave both fields empty to let the system look up the location automatically. Enter both values to override the automatic result.</small></div>
+                    <div class="col-md-6"><label asp-for="Input.Latitude" class="form-label">Latitude</label><input asp-for="Input.Latitude" type="number" step="any" min="-90" max="90" class="form-control" placeholder="e.g. -1.286389" /></div>
+                    <div class="col-md-6"><label asp-for="Input.Longitude" class="form-label">Longitude</label><input asp-for="Input.Longitude" type="number" step="any" min="-180" max="180" class="form-control" placeholder="e.g. 36.817223" /></div>
+                    <div class="col-12"><button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Register Hospital</button></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white py-3"><h5 class="mb-0 fw-bold">Registered Hospitals</h5></div>
+        <div class="card-body">
+            @if (Model.Institutions.Count == 0)
+            {
+                <div class="alert alert-info mb-0">No hospitals have been registered yet.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light"><tr><th>Hospital Name</th><th>Hospital Code</th><th>Address</th><th>County</th><th>Sub-County</th><th>Coordinates</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody>
+                            @foreach (var hospital in Model.Institutions)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@hospital.Name</td>
+                                    <td>@hospital.Code</td>
+                                    <td>@(hospital.Address ?? "Not provided")</td>
+                                    <td>@(hospital.County ?? "Not provided")</td>
+                                    <td>@(hospital.SubCounty ?? "Not provided")</td>
+                                    <td>@(hospital.Latitude.HasValue && hospital.Longitude.HasValue ? $"{hospital.Latitude:F6}, {hospital.Longitude:F6}" : "Not located")</td>
+                                    <td>@if (hospital.IsActive) {
+                                        <span class="badge bg-success">Active</span>
+                                    } else
+                                    {
+
+                                        <span class="badge bg-danger">Inactive</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editHospital-@hospital.Id">Edit</button>
+                                        <form method="post" asp-page-handler="ChangeStatus" onsubmit="return confirm('Are you sure you want to change this hospital status?');">
+                                            <input type="hidden" name="id" value="@hospital.Id" />
+                                            @if (hospital.IsActive)
+                                            {
+                                                <input type="hidden" name="isActive" value="false" /><button type="submit" class="btn btn-sm btn-outline-danger">Deactivate</button>
+                                            }
+                                            else
+                                            {
+
+                                                <input type="hidden" name="isActive" value="true" /><button type="submit" class="btn btn-sm btn-outline-success">Activate</button>
+                                            }
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @foreach (var hospital in Model.Institutions)
+            {
+                <div class="modal fade" id="editHospital-@hospital.Id" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <form method="post" asp-page-handler="Update">
+                                <div class="modal-header"><h5 class="modal-title">Edit Hospital</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                                <div class="modal-body">
+                                    <input type="hidden" name="id" value="@hospital.Id" />
+                                    <div class="row g-3">
+                                        <div class="col-md-6"><label class="form-label">Hospital Name</label><input name="name" class="form-control" value="@hospital.Name" required /></div>
+                                        <div class="col-md-6"><label class="form-label">Hospital Code</label><input name="code" class="form-control" value="@hospital.Code" required /></div>
+                                        <div class="col-12"><label class="form-label">Hospital Address</label><input name="address" class="form-control" value="@hospital.Address" /></div>
+                                        <div class="col-md-6"><label class="form-label">County</label><input name="county" class="form-control" value="@hospital.County" required /></div>
+                                        <div class="col-md-6"><label class="form-label">Sub-County</label><input name="subCounty" class="form-control" value="@hospital.SubCounty" required /></div>
+                                        <div class="col-12"><hr class="my-2" /><h6 class="fw-bold mb-1">Map Coordinates</h6><small class="text-muted">Keep the current values, or enter both coordinates to correct the map location. Leave both empty to use automatic lookup if the address or area changes.</small></div>
+                                        <div class="col-md-6"><label class="form-label">Latitude</label><input name="latitude" type="number" step="any" min="-90" max="90" class="form-control" value="@hospital.Latitude" /></div>
+                                        <div class="col-md-6"><label class="form-label">Longitude</label><input name="longitude" type="number" step="any" min="-180" max="180" class="form-control" value="@hospital.Longitude" /></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+</div>

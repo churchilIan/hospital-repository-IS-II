@@ -1,0 +1,208 @@
+﻿
+@page
+@model HospitalRepository.Web.Pages.Institution.DashboardModel
+
+@{
+    ViewData["Title"] = "Hospital Administrator Dashboard";
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3">Hospital Administrator Dashboard</h1>
+            <p class="text-secondary">
+                Manage your hospital's activities and healthcare staff.
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-primary">
+                Hospital Administrator
+            </span>
+
+            <form method="post"
+                  asp-page="/Account/Logout"
+                  onsubmit="localStorage.removeItem('hospitalRepositoryToken');
+                            localStorage.removeItem('hospitalRepositoryUser');">
+
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i>
+                    Log Out
+                </button>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Hospital Information -->
+    @if (Model.Hospital != null)
+    {
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-secondary mb-1">
+                            Your Registered Hospital
+                        </p>
+
+                        <h3 class="mb-1">
+                            @Model.Hospital.Name
+                        </h3>
+
+                        <p class="text-secondary mb-0">
+                            Hospital Code: <strong>@Model.Hospital.Code</strong>
+                        </p>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Hospital.Address))
+                        {
+                            <p class="text-secondary mt-2 mb-0">
+                                <i class="bi bi-geo-alt me-1"></i>
+                                @Model.Hospital.Address
+                            </p>
+                        }
+                    </div>
+
+                    <div>
+                        @if (Model.Hospital.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                Active Hospital
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">
+                                Inactive Hospital
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            <h5>Hospital Information Unavailable</h5>
+            <p class="mb-0">
+                Your account is not currently associated with a registered
+                hospital. Please contact the Central Administrator.
+            </p>
+        </div>
+    }
+
+    <!-- Welcome Message -->
+    <div class="alert alert-info mb-4">
+        <h5>Welcome to the Hospital Management Portal</h5>
+        <p class="mb-0">
+            Use this dashboard to manage healthcare staff and access
+            patient records associated with your hospital.
+        </p>
+    </div>
+
+    <!-- Dashboard Management Cards -->
+    <div class="row g-3">
+
+        <!-- Hospital Information -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-hospital fs-2 text-primary"></i>
+                    </div>
+
+                    <h5>Hospital Information</h5>
+
+                    <p class="text-secondary">
+                        View your hospital's registered information,
+                        address and operational status.
+                    </p>
+
+                    <button class="btn btn-outline-primary" disabled>
+                        View Hospital
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Healthcare Staff -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-person-badge fs-2 text-primary"></i>
+                    </div>
+
+                    <h5>Healthcare Staff</h5>
+
+                    <p class="text-secondary">
+                        Register and view doctors, nurses, pharmacists
+                        and other healthcare professionals working at your hospital.
+                    </p>
+
+                    <a asp-page="/Institution/Staff"
+                       class="btn btn-primary">
+                        <i class="bi bi-people me-1"></i>
+                        Manage Staff
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patient Records -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <i class="bi bi-people fs-2 text-primary"></i>
+                    </div>
+
+                    <h5>Patient Records</h5>
+
+                    <p class="text-secondary">
+                        View and manage patient records associated
+                        with your hospital.
+                    </p>
+
+                    <a href="/Patients" class="btn btn-outline-primary">
+                        <i class="bi bi-folder2-open me-1"></i>
+                        View Patients
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-body">
+            <h5 class="mb-3">Quick Navigation</h5>
+
+            <div class="list-group list-group-flush">
+
+                <a asp-page="/Institution/Staff"
+                   class="list-group-item list-group-item-action">
+                    <i class="bi bi-person-badge me-2"></i>
+                    Manage Healthcare Staff
+                </a>
+
+                <a href="/Patients"
+                   class="list-group-item list-group-item-action">
+                    <i class="bi bi-people me-2"></i>
+                    Patient Records
+                </a>
+
+                <a href="/"
+                   class="list-group-item list-group-item-action">
+                    <i class="bi bi-house me-2"></i>
+                    Home
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+</div>

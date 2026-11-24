@@ -1,0 +1,575 @@
+@page
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Provider,ClinicalOfficer,Administrator,InstitutionAdmin")]
+
+@{
+    ViewData["Title"] = "Patient Records";
+}
+
+<div class="container-fluid mt-4 px-3 px-lg-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4 gap-3">
+        <div>
+            <p class="text-uppercase text-muted small mb-1">
+                National Hospital Repository / Clinical Workspace
+            </p>
+            <h2 class="fw-bold mb-1">Patient Records</h2>
+            <p class="text-muted mb-0">
+                Search, register and access authorized patient records across healthcare institutions.
+            </p>
+        </div>
+
+        <button class="btn btn-outline-danger" id="logout">
+            <i class="bi bi-box-arrow-right me-2"></i>
+            Sign Out
+        </button>
+    </div>
+
+    <div id="message" class="alert d-none" role="alert"></div>
+
+    <!-- Patient search -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+                <div>
+                    <h5 class="fw-bold mb-1">Master Patient Index</h5>
+                    <p class="text-muted small mb-0">
+                        Find patients using their name, hospital MRN or shared MPI ID.
+                    </p>
+                </div>
+
+                <span class="badge bg-primary px-3 py-2">
+                    Central Patient Repository
+                </span>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-md-9">
+                    <input type="text"
+                           id="search"
+                           class="form-control"
+                           placeholder="Enter patient name, MRN or MPI ID..." />
+                </div>
+
+                <div class="col-md-3 d-grid">
+                    <button class="btn btn-primary" id="refresh">
+                        <i class="bi bi-search me-2"></i>
+                        Search Patients
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Patient registration and search results -->
+    <div class="row g-4">
+
+        <!-- Registration form -->
+        <div class="col-lg-4">
+
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-1">Register Patient</h5>
+
+                    <p class="text-muted small mb-4">
+                        Register a patient under a healthcare institution.
+                        Existing patients can be linked using their shared MPI ID.
+                    </p>
+
+                    <form id="patientForm">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Given Name</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="givenName"
+                                   placeholder="Enter given name"
+                                   required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Family Name</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="familyName"
+                                   placeholder="Enter family name"
+                                   required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Local Medical Record Number</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="medicalRecordNumber"
+                                   placeholder="e.g. KNH-2026-001"
+                                   required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Shared Master Patient ID</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="masterPatientId"
+                                   placeholder="e.g. MPI-KE-10001" />
+
+                            <small class="text-muted">
+                                Enter an existing MPI ID to link this hospital record
+                                to an existing patient identity.
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Date of Birth</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="dateOfBirth"
+                                   required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Sex</label>
+                            <select class="form-select" id="sex" required>
+                                <option value="female">Female</option>
+                                <option value="male">Male</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Managing Institution</label>
+                            <select class="form-select"
+                                    id="institutionId"
+                                    required>
+                                <option value="">Loading hospitals...</option>
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary w-100"
+                                id="savePatient">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Register Patient
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Patient records table -->
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+                        <div>
+                            <h5 class="fw-bold mb-1">Patient Directory</h5>
+                            <p class="text-muted small mb-0">
+                                Patient records available to your account.
+                            </p>
+                        </div>
+
+                        <span class="badge bg-light text-dark border" id="recordCount">
+                            0 Records
+                        </span>
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table class="table table-hover align-middle">
+
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Master Patient ID</th>
+                                    <th>Hospital</th>
+                                    <th>Local MRN</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="patients">
+
+                                <tr>
+                                    <td colspan="5"
+                                        class="text-center text-muted py-4">
+                                        Loading patient records...
+                                    </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Information -->
+            <div class="alert alert-info mt-3 border-0">
+                <strong>Important:</strong>
+                A patient's Master Patient ID identifies their shared identity
+                across institutions. Each hospital can maintain its own local
+                Medical Record Number.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+<script>
+
+const token = localStorage.getItem("hospitalRepositoryToken");
+
+const messageBox = document.getElementById("message");
+
+const patientsTable = document.getElementById("patients");
+
+const institutionSelect = document.getElementById("institutionId");
+
+const searchInput = document.getElementById("search");
+
+const recordCount = document.getElementById("recordCount");
+
+const saveButton = document.getElementById("savePatient");
+
+
+// Authentication
+if (!token) {
+    window.location.href = "/Account/Login";
+}
+
+
+// API headers
+const headers = {
+    "Authorization": "Bearer " + token,
+    "Content-Type": "application/json"
+};
+
+
+// API helper
+async function api(url, options = {}) {
+
+    const response = await fetch(url, {
+        ...options,
+        headers: {
+            ...headers,
+            ...(options.headers || {})
+        }
+    });
+
+    if (response.status === 401) {
+
+        localStorage.clear();
+
+        window.location.href = "/Account/Login";
+
+        throw new Error("Your session has expired. Please sign in again.");
+    }
+
+    return response;
+}
+
+
+// Display messages
+function showMessage(message, type) {
+
+    messageBox.textContent = message;
+
+    messageBox.className = "alert alert-" + type;
+
+    messageBox.classList.remove("d-none");
+
+}
+
+
+// Safely escape text displayed in HTML
+function escapeHtml(value) {
+
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    })[character]);
+
+}
+
+
+// Load hospitals
+async function loadHospitals() {
+
+    try {
+
+        const response = await api("/api/institutions");
+
+        if (!response.ok) {
+            throw new Error("Could not retrieve healthcare institutions.");
+        }
+
+        const hospitals = await response.json();
+
+        institutionSelect.innerHTML =
+            '<option value="">Select healthcare institution</option>';
+
+        hospitals.forEach(hospital => {
+
+            const option = document.createElement("option");
+
+            option.value = hospital.id;
+
+            option.textContent =
+                hospital.name + " (" + hospital.code + ")";
+
+            institutionSelect.appendChild(option);
+
+        });
+
+    }
+    catch (error) {
+
+        institutionSelect.innerHTML =
+            '<option value="">Unable to load hospitals</option>';
+
+        showMessage(error.message, "danger");
+
+    }
+
+}
+
+
+// Load patient records
+async function loadPatients() {
+
+    patientsTable.innerHTML = `
+        <tr>
+            <td colspan="5" class="text-center py-4">
+                Loading records...
+            </td>
+        </tr>
+    `;
+
+    try {
+
+        const query = encodeURIComponent(searchInput.value.trim());
+
+        const response = await api("/api/patients?q=" + query);
+
+        if (!response.ok) {
+            throw new Error("Unable to retrieve patient records.");
+        }
+
+        const patients = await response.json();
+
+        recordCount.textContent = patients.length + " Records";
+
+        if (!patients.length) {
+
+            patientsTable.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        No patient records found.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+        patientsTable.innerHTML = patients.map(patient => `
+
+            <tr>
+
+                <td>
+                    <strong>
+                        ${escapeHtml(patient.givenName)}
+                        ${escapeHtml(patient.familyName)}
+                    </strong>
+
+                    <br>
+
+                    <small class="text-muted">
+                        ${escapeHtml(patient.dateOfBirth)}
+                        ·
+                        ${escapeHtml(patient.sex)}
+                    </small>
+                </td>
+
+                <td>
+                    <code>
+                        ${escapeHtml(patient.masterPatientId)}
+                    </code>
+                </td>
+
+                <td>
+                    ${escapeHtml(patient.managingInstitutionName || "Not specified")}
+                </td>
+
+                <td>
+                    ${escapeHtml(patient.medicalRecordNumber)}
+                </td>
+
+                <td>
+                    <a href="/Clinical/Patients/Details?id=${encodeURIComponent(patient.id)}"
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-folder2-open me-1"></i>
+                        Open Record
+                    </a>
+                </td>
+
+            </tr>
+
+        `).join("");
+
+    }
+    catch (error) {
+
+        patientsTable.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center text-danger py-4">
+                    ${escapeHtml(error.message)}
+                </td>
+            </tr>
+        `;
+
+    }
+
+}
+
+
+// Register patient
+document.getElementById("patientForm").addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    saveButton.disabled = true;
+
+    saveButton.textContent = "Registering...";
+
+    try {
+
+        const payload = {
+
+            givenName: document.getElementById("givenName").value.trim(),
+
+            familyName: document.getElementById("familyName").value.trim(),
+
+            medicalRecordNumber:
+                document.getElementById("medicalRecordNumber").value.trim(),
+
+            masterPatientId:
+                document.getElementById("masterPatientId").value.trim() || null,
+
+            dateOfBirth: document.getElementById("dateOfBirth").value,
+
+            sex: document.getElementById("sex").value,
+
+            managingInstitutionId: institutionSelect.value,
+
+            nationalIdentifier: null,
+
+            phone: null,
+
+            identifierSystem: null,
+
+            identifierValue: null
+
+        };
+
+
+        const response = await api("/api/patients", {
+
+            method: "POST",
+
+            body: JSON.stringify(payload)
+
+        });
+
+
+        const data = await response.json().catch(() => ({}));
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                data.title ||
+                "Patient registration failed."
+            );
+
+        }
+
+
+        showMessage(
+            "Patient record successfully registered. Master Patient ID: " +
+            data.masterPatientId,
+            "success"
+        );
+
+
+        this.reset();
+
+        await loadPatients();
+
+    }
+    catch (error) {
+
+        showMessage(error.message, "danger");
+
+    }
+    finally {
+
+        saveButton.disabled = false;
+
+        saveButton.innerHTML =
+            '<i class="bi bi-person-plus me-2"></i> Register Patient';
+
+    }
+
+});
+
+
+// Search and refresh
+document.getElementById("refresh").addEventListener("click", loadPatients);
+
+
+// Search as the user types
+searchInput.addEventListener("input", loadPatients);
+
+
+// Logout
+document.getElementById("logout").addEventListener("click", function() {
+
+    localStorage.clear();
+
+    window.location.href = "/Account/Login";
+
+});
+
+
+// Initial loading
+async function initializePage() {
+
+    await loadHospitals();
+
+    await loadPatients();
+
+}
+
+initializePage();
+
+</script>
+
+}

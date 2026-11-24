@@ -1,0 +1,140 @@
+﻿
+@page
+@model HospitalRepository.Web.Pages.Institution.StaffModel
+@using HospitalRepository.Domain.Entities
+
+@{
+    ViewData["Title"] = "Manage Hospital Staff";
+}
+
+<div class="container mt-4">
+    <h2>Manage Hospital Staff</h2>
+    <p>Register healthcare staff and create their login accounts.</p>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">
+            @Model.SuccessMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Register New Staff Member</h4>
+        </div>
+
+        <div class="card-body">
+            <form method="post" asp-page-handler="Create">
+
+                <div class="mb-3">
+                    <label asp-for="Input.GivenName" class="form-label">
+                        First Name
+                    </label>
+                    <input asp-for="Input.GivenName" class="form-control"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.FamilyName" class="form-label">
+                        Last Name
+                    </label>
+                    <input asp-for="Input.FamilyName" class="form-control"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.RegistrationNumber"
+                           class="form-label">
+                        Registration Number
+                    </label>
+                    <input asp-for="Input.RegistrationNumber"
+                           class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label">
+                        Email Address (Login Username)
+                    </label>
+                    <input asp-for="Input.Email" type="email"
+                           class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label">
+                        Initial Password
+                    </label>
+                    <input asp-for="Input.Password" type="password"
+                           class="form-control" required
+                           minlength="8" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Role" class="form-label">
+                        Staff Role
+                    </label>
+                    <select asp-for="Input.Role"
+                            asp-items="Html.GetEnumSelectList<ProviderRole>()"
+                            class="form-select">
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Register Staff
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Registered Hospital Staff</h4>
+        </div>
+
+        <div class="card-body">
+            @if (Model.StaffMembers.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Registration Number</th>
+                                <th>Role</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var staff in Model.StaffMembers)
+                            {
+                                <tr>
+                                    <td>@staff.GivenName</td>
+                                    <td>@staff.FamilyName</td>
+                                    <td>@staff.RegistrationNumber</td>
+                                    <td>@staff.Role</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p>No staff members have been registered yet.</p>
+            }
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-page="/Institution/Dashboard"
+           class="btn btn-secondary">
+            Back to Dashboard
+        </a>
+    </div>
+</div>

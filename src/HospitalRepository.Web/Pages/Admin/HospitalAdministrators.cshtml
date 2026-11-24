@@ -1,0 +1,102 @@
+﻿
+@page
+@model HospitalRepository.Web.Pages.Admin.HospitalAdministratorsModel
+
+@{
+    ViewData["Title"] = "Manage Hospital Administrators";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Manage Hospital Administrators</h2>
+            <p class="text-muted">
+                Create administrator accounts for registered hospitals.
+            </p>
+        </div>
+
+        <a asp-page="/Admin/Dashboard" class="btn btn-outline-secondary">
+            Back to Dashboard
+        </a>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">
+            @Model.SuccessMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">Create Hospital Administrator Account</h5>
+        </div>
+
+        <div class="card-body">
+            <form method="post" asp-page-handler="Create">
+
+                <div class="mb-3">
+                    <label class="form-label">Select Hospital</label>
+
+                    <select asp-for="Input.InstitutionId"
+                            asp-items="Model.Hospitals"
+                            class="form-select"
+                            required>
+                        <option value="">-- Select a Hospital --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.DisplayName" class="form-label">
+                        Administrator's Full Name
+                    </label>
+
+                    <input asp-for="Input.DisplayName"
+                           class="form-control"
+                           placeholder="Enter full name"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label">
+                        Email Address
+                    </label>
+
+                    <input asp-for="Input.Email"
+                           type="email"
+                           class="form-control"
+                           placeholder="admin@hospital.com"
+                           required />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label">
+                        Initial Password
+                    </label>
+
+                    <input asp-for="Input.Password"
+                           type="password"
+                           class="form-control"
+                           placeholder="Enter initial password"
+                           required />
+                    <small class="text-muted">
+                        The password must meet the system's password requirements.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    Create Administrator Account
+                </button>
+
+            </form>
+        </div>
+    </div>
+</div>

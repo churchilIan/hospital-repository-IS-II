@@ -1,0 +1,86 @@
+
+@page
+@{
+    ViewData["Title"] = "Register account";
+}
+
+<div class="auth-shell">
+    <div class="auth-card card shadow-sm border-0">
+        <div class="card-body p-4 p-md-5">
+
+            <p class="eyebrow">Hospital Repository</p>
+
+            <h1 class="h3 mb-2">Create a patient account</h1>
+
+            <p class="text-secondary">
+                Register to access your health information across participating hospitals.
+            </p>
+
+            <div id="message" class="alert d-none" role="alert"></div>
+
+            <form id="registerForm" class="mt-4">
+
+                <label class="form-label" for="displayName">Full name</label>
+                <input class="form-control mb-3" id="displayName" required />
+
+                <label class="form-label" for="email">Email</label>
+                <input class="form-control mb-3" id="email" type="email" required />
+
+                <label class="form-label" for="password">Password</label>
+                <input class="form-control mb-4"
+                       id="password"
+                       type="password"
+                       minlength="8"
+                       required />
+
+                <button class="btn btn-primary w-100" type="submit">
+                    Create patient account
+                </button>
+
+            </form>
+
+            <p class="small text-secondary mt-4 mb-0">
+                Already registered?
+                <a href="/Account/Login">Sign in</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.getElementById('registerForm').addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const box = document.getElementById('message');
+
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                displayName: document.getElementById('displayName').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            })
+        });
+
+        const data = await response.json();
+
+        box.textContent = data.message || data.error || 'Registration failed.';
+        box.className = 'alert ' + (response.ok ? 'alert-success' : 'alert-danger');
+
+        if (response.ok) {
+            setTimeout(() => location.href = '/Account/Login', 900);
+        }
+    }
+    catch (error) {
+        box.textContent = 'Unable to connect to the server. Please try again.';
+        box.className = 'alert alert-danger';
+    }
+});
+</script>
+}

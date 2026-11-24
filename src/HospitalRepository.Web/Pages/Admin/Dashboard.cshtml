@@ -1,0 +1,162 @@
+﻿
+@page
+@model HospitalRepository.Web.Pages.Admin.DashboardModel
+
+@{
+    ViewData["Title"] = "Administrator Dashboard";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3">Administrator Dashboard</h1>
+            <p class="text-secondary">
+                National Hospital Repository Management
+            </p>
+        </div>
+
+        <span class="badge bg-primary">Central Administrator</span>
+    </div>
+
+    <!-- Repository Statistics -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary mb-1">Total Hospitals</p>
+                    <h2>@Model.TotalHospitals</h2>
+                    <small class="text-success">Registered institutions</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary mb-1">Total Patients</p>
+                    <h2>@Model.TotalPatients</h2>
+                    <small class="text-success">Repository records</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary mb-1">Healthcare Staff</p>
+                    <h2>@Model.TotalProviders</h2>
+                    <small class="text-secondary">Registered professionals</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <p class="text-secondary mb-1">System Status</p>
+                    <h2 class="text-success">Active</h2>
+                    <small class="text-secondary">Repository overview</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Management Sections -->
+    <div class="row g-3">
+
+        <div class="col-lg-8">
+
+            <!-- Hospital Management -->
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5>Hospital Management</h5>
+                    <p class="text-secondary">
+                        Register hospitals, update their information,
+                        and activate or deactivate institutions connected
+                        to the national repository.
+                    </p>
+
+                    <a asp-page="/Admin/Institutions" class="btn btn-primary">
+                        <i class="bi bi-hospital me-1"></i>
+                        Manage Hospitals
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hospital Administrators -->
+            <div class="card shadow-sm border-0 mt-3">
+                <div class="card-body">
+                    <h5>Hospital Administrators</h5>
+                    <p class="text-secondary">
+                        Create administrator accounts and assign them
+                        to their respective hospitals.
+                    </p>
+
+                    <a asp-page="/Admin/HospitalAdministrators"
+                       class="btn btn-outline-primary">
+                        <i class="bi bi-person-gear me-1"></i>
+                        Manage Hospital Administrators
+                    </a>
+                </div>
+            </div>
+
+            <!-- Patient Repository -->
+            <div class="card shadow-sm border-0 mt-3">
+                <div class="card-body">
+                    <h5>Patient Repository</h5>
+                    <p class="text-secondary">
+                        Search and review centrally stored patient records.
+                    </p>
+
+                    <a href="/Patients" class="btn btn-outline-primary">
+                        <i class="bi bi-people me-1"></i>
+                        View Patients
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Administration Links -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5>Administration</h5>
+
+                    <div class="list-group list-group-flush">
+
+                        <a href="/Patients"
+                           class="list-group-item list-group-item-action">
+                            <i class="bi bi-people me-2"></i>
+                            Patient Records
+                        </a>
+
+                        <a asp-page="/Admin/Institutions"
+                           class="list-group-item list-group-item-action">
+                            <i class="bi bi-hospital me-2"></i>
+                            Hospital Management
+                        </a>
+
+                        <a asp-page="/Admin/HospitalAdministrators"
+                           class="list-group-item list-group-item-action">
+                            <i class="bi bi-person-gear me-2"></i>
+                            Hospital Administrators
+                        </a>
+
+                        <a href="/Audit"
+                           class="list-group-item list-group-item-action">
+                            <i class="bi bi-journal-text me-2"></i>
+                            Audit Logs
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,112 @@
+@page
+@{
+    ViewData["Title"] = "Sign in";
+}
+
+<div class="auth-shell">
+    <div class="auth-card card shadow-sm border-0">
+        <div class="card-body p-4 p-md-5">
+
+            <p class="eyebrow">Hospital Repository</p>
+            <h1 class="h3 mb-2">Sign in to the repository</h1>
+            <p class="text-secondary">
+                Use your patient, doctor, clinical officer or administrator account.
+            </p>
+
+            <div id="message" class="alert d-none" role="alert"></div>
+
+            <form id="loginForm" class="mt-4">
+
+                <label class="form-label" for="email">Email</label>
+                <input class="form-control mb-3"
+                       id="email"
+                       type="email"
+                       required
+                       autocomplete="email" />
+
+                <label class="form-label" for="password">Password</label>
+                <input class="form-control mb-4"
+                       id="password"
+                       type="password"
+                       required
+                       autocomplete="current-password" />
+
+                <button class="btn btn-primary w-100" type="submit">
+                    Sign in
+                </button>
+
+            </form>
+
+            <p class="small text-secondary mt-4 mb-0">
+                No account? <a href="/Account/Register">Register here</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const message = document.getElementById('message');
+
+        document.getElementById('loginForm').addEventListener('submit', async event => {
+
+            event.preventDefault();
+            message.className = 'alert d-none';
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    message.textContent = data.error || 'Sign in failed.';
+                    message.className = 'alert alert-danger';
+                    return;
+                }
+
+                // Save login information.
+                localStorage.setItem('hospitalRepositoryToken', data.accessToken);
+                localStorage.setItem('hospitalRepositoryUser', JSON.stringify(data));
+
+                // Read the user's assigned roles.
+                const roles = (data.roles || []).map(role => role.toLowerCase());
+
+                // Redirect according to the user's role.
+                if (roles.includes('administrator')) {
+                    window.location.href = '/Admin/Dashboard';
+                }
+                else if (roles.includes('institutionadmin')) {
+                    window.location.href = '/Institution/Dashboard';
+                }
+                else if (roles.includes('clinicalofficer') || roles.includes('provider')) {
+                    window.location.href = '/Clinical/Dashboard';
+                }
+                else if (roles.includes('patient')) {
+                    window.location.href = '/Patient/Dashboard';
+                }
+                else if (roles.includes('auditor')) {
+                    window.location.href = '/Audit/Dashboard';
+                }
+                else {
+                    message.textContent = 'Your account does not have an assigned application role.';
+                    message.className = 'alert alert-warning';
+                }
+
+            }
+            catch (error) {
+                message.textContent = 'Unable to connect to the server. Please try again.';
+                message.className = 'alert alert-danger';
+            }
+        });
+    </script>
+}
